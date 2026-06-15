@@ -1,11 +1,13 @@
 import math
+import sys
 
-import math
+# Agar kurigram installed hai, toh use hi pyrogram bana do!
+try:
+    import kurigram as pyrogram
+except ImportError:
+    import pyrogram
 
-from pyrogram.types import InlineKeyboardButton  # Wapas 'pyrogram' kar dein
-from AnonXMusic.utils.formatters import time_to_seconds
-
-
+from pyrogram.types import InlineKeyboardButton
 from AnonXMusic.utils.formatters import time_to_seconds
 
 
