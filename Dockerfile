@@ -1,4 +1,4 @@
-
+id="4m0xtj"
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -18,9 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     pkg-config \
     && pip install --no-cache-dir uv \
-    && uv venv \
-    && . .venv/bin/activate \
-    && uv pip install -r requirements.txt \
+    && uv sync --frozen \
     && apt-get remove -y --purge \
        build-essential \
        python3-dev \
