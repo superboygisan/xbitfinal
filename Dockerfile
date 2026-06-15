@@ -6,26 +6,21 @@ WORKDIR /app
 COPY . /app/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
     bash \
+    curl \
     ffmpeg \
     git \
     zip \
+    gcc \
+    g++ \
+    musl-dev \
     build-essential \
     python3-dev \
-    libssl-dev \
     libffi-dev \
+    libssl-dev \
     pkg-config \
     && pip install --no-cache-dir uv \
     && uv sync --frozen \
-    && apt-get remove -y --purge \
-       build-essential \
-       python3-dev \
-       libssl-dev \
-       libffi-dev \
-       pkg-config \
-    && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
