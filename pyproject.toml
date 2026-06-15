@@ -15,6 +15,7 @@ dependencies = [
     "hachoir>=3.2.0",
     "heroku3>=5.2.0",
     "httpx==0.28.1",
+    "kurigram==2.2.19",  # Ye hamara main stylish buttons wala package rahega
     "motor==3.7.1",
     "numpy==2.4.4",
     "opencv-python==4.13.0.92",
@@ -32,12 +33,7 @@ dependencies = [
     "uvloop>=0.19.0 ; sys_platform != 'win32'",
     "yt-dlp==2026.3.17",
     "yt-search-py==1.0.0",
-    "pyrogram", # Humne dependencies mein normal pyrogram bola
 ]
 
 [dependency-groups]
 dev = []
-
-# Aur UV ko bola ki normal pyrogram mat uthao, GitHub wala stylish uthao!
-[tool.uv.sources]
-pyrogram = { git = "https://github.com/vsec0/pyrogram" }
