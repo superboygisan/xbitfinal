@@ -1,6 +1,10 @@
 import math
 
-from kurigram.types import InlineKeyboardButton
+import math
+
+from pyrogram.types import InlineKeyboardButton  # Wapas 'pyrogram' kar dein
+from AnonXMusic.utils.formatters import time_to_seconds
+
 
 from AnonXMusic.utils.formatters import time_to_seconds
 
