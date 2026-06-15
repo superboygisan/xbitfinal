@@ -1,4 +1,4 @@
-id="4m0xtj"
+
 FROM python:3.11-slim
 
 WORKDIR /app
