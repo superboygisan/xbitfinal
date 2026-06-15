@@ -8,6 +8,22 @@ from pyrogram.types import Message
 from ytSearch import VideosSearch, Playlist
 import aiohttp
 
+
+
+def cookie_txt_file():
+    try:
+        folder_path = f"{os.getcwd()}/cookies"
+        filename = f"{os.getcwd()}/cookies/logs.csv"
+        txt_files = glob.glob(os.path.join(folder_path, '*.txt'))
+        if not txt_files:
+            raise FileNotFoundError("No .txt files found in the specified folder.")
+        cookie_txt_file = random.choice(txt_files)
+        with open(filename, 'a') as file:
+            file.write(f'Choosen File : {cookie_txt_file}\n')
+        return f"""cookies/{str(cookie_txt_file).split("/")[-1]}"""
+    except:
+        return None
+
 API_URL = os.environ.get("SHRUTI_API_URL", "https://api.shrutibots.site")
 
 API_KEY = os.environ.get("SHRUTI_API_KEY", "ShrutiBotsWtQUKDTAv5KUMyByWwFe") ## Get This API KEY FROM TELEGRAM BOT USERNAME: @SHRUTIAPIBOT 
