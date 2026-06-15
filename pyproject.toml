@@ -40,3 +40,7 @@ dev = []
 
 [tool.uv]
 exclude-dependencies = ["pyrogram"]
+
+
+[tool.uv.sources]
+pyrogram = { git = "https://github.com/KurvaDev/KurvaGram" }
