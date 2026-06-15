@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System tools install karein
+# 1. Saare system tools install karein
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
@@ -20,12 +20,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# 2. Files copy karein
 COPY . /app/
 
-# UV install karein aur dependencies sync karein
-RUN pip install --no-cache-dir uv
-RUN uv sync --no-frozen
+# 3. Pip aur UV ko install/upgrade karein
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir uv
 
+# 4. Ab sirf uv sync chalayein, yeh pyproject.toml se kurigram ko khud utha lega
+RUN uv sync
+
+# 5. Virtual environment ka path set karein
 ENV PATH="/app/.venv/bin:$PATH"
 
 CMD ["bash", "start"]
