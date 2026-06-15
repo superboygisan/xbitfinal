@@ -15,7 +15,7 @@ dependencies = [
     "hachoir>=3.2.0",
     "heroku3>=5.2.0",
     "httpx==0.28.1",
-    "kurigram==2.2.19",
+    "kurigram==2.2.19",  # Yeh pehle se hi stylish/colored buttons support karta hai!
     "motor==3.7.1",
     "numpy==2.4.4",
     "opencv-python==4.13.0.92",
@@ -37,10 +37,3 @@ dependencies = [
 
 [dependency-groups]
 dev = []
-
-[tool.uv]
-exclude-dependencies = ["pyrogram"]
-
-
-[tool.uv.sources]
-pyrogram = { git = "https://github.com/KurvaDev/KurvaGram" }
