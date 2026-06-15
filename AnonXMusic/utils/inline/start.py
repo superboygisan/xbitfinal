@@ -1,6 +1,17 @@
+
+import json
+import requests
+
 from AnonXMusic import app
 import config
 
+
+BOT_TOKEN = config.BOT_TOKEN
+
+
+# =========================
+# START PANEL
+# =========================
 
 def start_panel(_):
 
@@ -21,8 +32,12 @@ def start_panel(_):
         ]
     }
 
-    return buttons
+    return json.dumps(buttons)
 
+
+# =========================
+# PRIVATE PANEL
+# =========================
 
 def private_panel(_):
 
@@ -48,7 +63,7 @@ def private_panel(_):
             [
                 {
                     "text": f"🌛 {_['S_B_6']}",
-                    "user_id": config.OWNER_ID,
+                    "url": f"https://t.me/{config.OWNER_USERNAME}",
                     "style": "primary"
                 },
                 {
@@ -69,7 +84,7 @@ def private_panel(_):
             [
                 {
                     "text": "🌛 • LALA LALA •",
-                    "url": "CURRENCY",
+                    "url": "https://t.me",
                     "style": "danger"
                 }
             ],
@@ -77,4 +92,22 @@ def private_panel(_):
         ]
     }
 
-    return buttons
+    return json.dumps(buttons)
+
+
+# =========================
+# SEND RAW COLORED BUTTONS
+# =========================
+
+async def send_colored_message(chat_id, text, reply_markup):
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "reply_markup": reply_markup,
+        "parse_mode": "HTML"
+    }
+
+    requests.post(url, data=data)
