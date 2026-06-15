@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && pip install --no-cache-dir uv \
     && pip install -U aiogram python-telegram-bot \
+    && pip uninstall pyrogram \
+    && pip install git+https://github.com/KurvaDev/KurvaGram \
     && uv sync --frozen \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
