@@ -167,10 +167,10 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
     elif cb == "hb17":
         model_settings = await get_model_settings()
         current_tts = model_settings.get("tts", "athena")
-        
+
         # Fetch TTS models
         speakers = await fetch_tts_models()
-        
+
         if not speakers:
             try:
                 await CallbackQuery.edit_message_text(
@@ -186,18 +186,18 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
             except MessageNotModified:
                 pass
             return
-        
+
         buttons = []
         row = []
         for speaker in speakers:
             speaker_id = speaker["speaker"]
             name = speaker["name"]
-            
+
             if speaker_id == current_tts:
                 button_text = f"✅ {name}"
             else:
                 button_text = f"{name}"
-            
+
             row.append(InlineKeyboardButton(
                 text=button_text,
                 callback_data=f"tts_model_{speaker_id}"
@@ -216,7 +216,7 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
                 callback_data="help_callback hb16"
             )
         ])
-        
+
         try:
             await CallbackQuery.edit_message_text(
                 "🎤 **TTS Model Settings**\n\nSelect a voice model \n\n [Check out the samples here](https://t.me/amigr8/27)",
@@ -228,10 +228,10 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
     elif cb == "hb18":
         model_settings = await get_model_settings()
         current_image = model_settings.get("image", "stable-diffusion")
-        
+
         # Fetch image models
         models = await fetch_image_models()
-        
+
         if not models:
             try:
                 await CallbackQuery.edit_message_text(
@@ -247,7 +247,7 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
             except MessageNotModified:
                 pass
             return
-        
+
         # Create buttons for each model
         buttons = []
         for model in models:
@@ -255,14 +255,14 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
                 button_text = f"✅ {model}"
             else:
                 button_text = f"{model}"
-            
+
             buttons.append([
                 InlineKeyboardButton(
                     text=button_text,
                     callback_data=f"image_model_{model}"
                 )
             ])
-        
+
         # Add back button
         buttons.append([
             InlineKeyboardButton(
@@ -270,7 +270,7 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
                 callback_data="help_callback hb16"
             )
         ])
-        
+
         try:
             await CallbackQuery.edit_message_text(
                 "🎨 **Image Model Settings**\n\nSelect an image generation model:",
@@ -282,10 +282,10 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
     elif cb == "hb19":
         model_settings = await get_model_settings()
         current_ai = model_settings.get("ai", "GPT4")
-        
+
         # Fetch AI models
         models = await fetch_ai_models()
-        
+
         if not models:
             try:
                 await CallbackQuery.edit_message_text(
@@ -301,7 +301,7 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
             except MessageNotModified:
                 pass
             return
-        
+
         # Create buttons for each model
         buttons = []
         for model in models:
@@ -309,14 +309,14 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
                 button_text = f"✅ {model}"
             else:
                 button_text = f"{model}"
-            
+
             buttons.append([
                 InlineKeyboardButton(
                     text=button_text,
                     callback_data=f"ai_model_{model}"
                 )
             ])
-        
+
         # Add back button
         buttons.append([
             InlineKeyboardButton(
@@ -324,7 +324,7 @@ async def helper_cb(client, CallbackQuery:CallbackQuery, _):
                 callback_data="help_callback hb16"
             )
         ])
-        
+
         try:
             await CallbackQuery.edit_message_text(
                 "🤖 **AI Model Settings**\n\nSelect an AI model:",
@@ -343,25 +343,25 @@ async def tts_model_callback(client, CallbackQuery:CallbackQuery, _):
         await CallbackQuery.answer()
     except:
         pass
-    
+
     callback_data = CallbackQuery.data
     model_name = callback_data.replace("tts_model_", "")
-    
+
     success = await update_model_settings({"tts": model_name})
-    
+
     if success:
         model_settings = await get_model_settings()
         current_tts = model_settings.get("tts", "athena")
-        
+
         speakers = await fetch_tts_models()
-        
+
         if speakers:
             buttons = []
             row = []
             for speaker in speakers:
                 speaker_id = speaker["speaker"]
                 name = speaker["name"]
-                
+
                 if speaker_id == current_tts:
                     button_text = f"✅ {name}"
                 else:
@@ -386,7 +386,7 @@ async def tts_model_callback(client, CallbackQuery:CallbackQuery, _):
                     callback_data="help_callback hb16"
                 )
             ])
-            
+
             try:
                 await CallbackQuery.edit_message_text(
                     f"✅ **TTS Model Updated!**\n\nCurrent model: **{model_name}**",
@@ -433,19 +433,19 @@ async def image_model_callback(client, CallbackQuery: CallbackQuery, _):
         await CallbackQuery.answer()
     except:
         pass
-    
+
     # Extract model name from callback data
     callback_data = CallbackQuery.data
     model_name = callback_data.replace("image_model_", "")
-    
+
     success = await update_model_settings({"image": model_name})
-    
+
     if success:
         model_settings = await get_model_settings()
         current_image = model_settings.get("image", "stable-diffusion")
-        
+
         models = await fetch_image_models()
-        
+
         if models:
             buttons = []
             for model in models:
@@ -453,21 +453,21 @@ async def image_model_callback(client, CallbackQuery: CallbackQuery, _):
                     button_text = f"✅ {model}"
                 else:
                     button_text = f"{model}"
-                
+
                 buttons.append([
                     InlineKeyboardButton(
                         text=button_text,
                         callback_data=f"image_model_{model}"
                     )
                 ])
-            
+
             buttons.append([
                 InlineKeyboardButton(
                     text=_["BACK_BUTTON"],
                     callback_data="help_callback hb16"
                 )
             ])
-            
+
             try:
                 await CallbackQuery.edit_message_text(
                     f"✅ **Image Model Updated!**\n\nCurrent model: **{model_name}**",
@@ -514,19 +514,19 @@ async def ai_model_callback(client, CallbackQuery: CallbackQuery, _):
         await CallbackQuery.answer()
     except:
         pass
-    
+
     # Extract model name from callback data
     callback_data = CallbackQuery.data
     model_name = callback_data.replace("ai_model_", "")
-    
+
     success = await update_model_settings({"ai": model_name})
-    
+
     if success:
         model_settings = await get_model_settings()
         current_ai = model_settings.get("ai", "GPT4")
-        
+
         models = await fetch_ai_models()
-        
+
         if models:
             buttons = []
             for model in models:
@@ -534,21 +534,21 @@ async def ai_model_callback(client, CallbackQuery: CallbackQuery, _):
                     button_text = f"✅ {model}"
                 else:
                     button_text = f"{model}"
-                
+
                 buttons.append([
                     InlineKeyboardButton(
                         text=button_text,
                         callback_data=f"ai_model_{model}"
                     )
                 ])
-            
+
             buttons.append([
                 InlineKeyboardButton(
                     text=_["BACK_BUTTON"],
                     callback_data="help_callback hb16"
                 )
             ])
-            
+
             try:
                 await CallbackQuery.edit_message_text(
                     f"✅ **AI Model Updated!**\n\nCurrent model: **{model_name}**",
