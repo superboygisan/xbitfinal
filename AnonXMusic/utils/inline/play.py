@@ -2,6 +2,14 @@ import math
 from pyrogram.types import InlineKeyboardButton
 from AnonXMusic.utils.formatters import time_to_seconds
 
+import requests
+import json
+
+BOT_TOKEN = "7463997374:AAEkcXquTUJgfNwkdilkzcpHLJuxALU9o24"
+CHAT_ID = "-1002460622908"
+
+url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
 
 # ================== BEAUTIFUL BUTTON DESIGN ==================
 
