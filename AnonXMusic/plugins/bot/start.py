@@ -90,12 +90,19 @@ async def start_pm(client, message: Message, _):
                     text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
                 )
     else:
+        # BINA COMMAND AUR STYLE BADLE—YAHAN PAR COLORFUL CORE EMOBIS ADD KIYE HAIN
         out = private_panel(_)
+        colorful_out = [
+            [InlineKeyboardButton(text=f"🔹 {btn.text} 🔹", url=btn.url, callback_data=btn.callback_data)]
+            if isinstance(row, list) and len(row) == 1 else
+            [InlineKeyboardButton(text=f"🔸 {btn.text}" if i==0 else f"{btn.text} 🔸", url=btn.url, callback_data=btn.callback_data) for i, btn in enumerate(row)]
+            for row in out
+        ]
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
         await message.reply_photo(
             photo=random.choice(config.START_IMG_URL),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=InlineKeyboardMarkup(out),
+            reply_markup=InlineKeyboardMarkup(colorful_out),
         )
         if await is_on_off(2):
             return await app.send_message(
@@ -108,13 +115,20 @@ async def start_pm(client, message: Message, _):
 @LanguageStart
 async def start_gp(client, message: Message, _):
     out = start_panel(_)
+    # BINA LOGIC TOUCH KIYE GROUP PANEL KO COLORFUL BANAYA
+    colorful_out = [
+        [InlineKeyboardButton(text=f"🔹 {btn.text} 🔹", url=btn.url, callback_data=btn.callback_data)]
+        if isinstance(row, list) and len(row) == 1 else
+        [InlineKeyboardButton(text=f"🔸 {btn.text}" if i==0 else f"{btn.text} 🔸", url=btn.url, callback_data=btn.callback_data) for i, btn in enumerate(row)]
+        for row in out
+    ]
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-    )
+            photo=random.choice(config.START_IMG_URL),
+            caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+            reply_markup=InlineKeyboardMarkup(colorful_out),
+        )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
@@ -122,10 +136,10 @@ async def start_gp(client, message: Message, _):
         asyncio.sleep(e.value)
         try:
             await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-        )
+                photo=random.choice(config.START_IMG_URL),
+                caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+                reply_markup=InlineKeyboardMarkup(colorful_out),
+            )
             return await add_served_chat(message.chat.id)
         except:
             return
@@ -156,7 +170,7 @@ async def welcome(client, message: Message):
                         disable_web_page_preview=True,
                     )
                     return await app.leave_chat(message.chat.id)
-                
+
                 ch = await app.get_chat(message.chat.id)
                 if (ch.title and re.search(r'[\u1000-\u109F]', ch.title)) or \
                     (ch.description and re.search(r'[\u1000-\u109F]', ch.description)):
@@ -166,6 +180,13 @@ async def welcome(client, message: Message):
                         return await app.leave_chat(message.chat.id)
 
                 out = start_panel(_)
+                # WELCOME ROW ME BHI COLOR FORMAT SELECTION
+                colorful_out = [
+                    [InlineKeyboardButton(text=f"🔹 {btn.text} 🔹", url=btn.url, callback_data=btn.callback_data)]
+                    if isinstance(row, list) and len(row) == 1 else
+                    [InlineKeyboardButton(text=f"🔸 {btn.text}" if i==0 else f"{btn.text} 🔸", url=btn.url, callback_data=btn.callback_data) for i, btn in enumerate(row)]
+                    for row in out
+                ]
                 await message.reply_photo(
                     photo=random.choice(config.START_IMG_URL),
                     caption=_["start_3"].format(
@@ -174,7 +195,7 @@ async def welcome(client, message: Message):
                         message.chat.title,
                         app.mention,
                     ),
-                    reply_markup=InlineKeyboardMarkup(out),
+                    reply_markup=InlineKeyboardMarkup(colorful_out),
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
