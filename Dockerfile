@@ -1,4 +1,3 @@
-
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -23,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pip install -U aiogram python-telegram-bot \
     && pip uninstall pyrogram \
     && pip install git+https://github.com/KurvaDev/KurvaGram \
-    && uv sync --frozen \
+    && uv sync --no-frozen \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
