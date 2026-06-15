@@ -1,163 +1,166 @@
-from typing import Union
-
-from pyrogram.types import InlineKeyboardMarkup
-
-from AnonXMusic import app
+import math
+from pyrogram.types import InlineKeyboardButton
+from AnonXMusic.utils.formatters import time_to_seconds
 
 
-def help_pannel(_, is_sudo, START: Union[bool, int] = None):
-
-    first = [
-        {
-            "text": f"🌛 {_['CLOSE_BUTTON']}",
-            "callback_data": "close",
-            "style": "danger"
-        }
+def track_markup(_, videoid, user_id, channel, fplay):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+                style="success",  # Green color for selection
+            ),
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+                style="success",  # Green color for selection
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+                style="danger",  # Red color for close
+            )
+        ],
     ]
+    return buttons
 
-    second = [
-        {
-            "text": f"🌛 {_['BACK_BUTTON']}",
-            "callback_data": "settingsback_helper",
-            "style": "primary"
-        }
+
+def stream_markup_timer(_, chat_id, played, dur):
+    played_sec = time_to_seconds(played)
+    duration_sec = time_to_seconds(dur)
+    percentage = (played_sec / duration_sec) * 100
+    umm = math.floor(percentage)
+    if 0 < umm <= 10:
+        bar = "◉—————————"
+    elif 10 < umm < 20:
+        bar = "—◉————————"
+    elif 20 <= umm < 30:
+        bar = "——◉———————"
+    elif 30 <= umm < 40:
+        bar = "———◉——————"
+    elif 40 <= umm < 50:
+        bar = "————◉—————"
+    elif 50 <= umm < 60:
+        bar = "—————◉————"
+    elif 60 <= umm < 70:
+        bar = "——————◉———"
+    elif 70 <= umm < 80:
+        bar = "———————◉——"
+    elif 80 <= umm < 95:
+        bar = "————————◉—"
+    else:
+        bar = "—————————◉"
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=f"{played} {bar} {dur}",
+                callback_data="GetTimer",
+                style="primary",  # Blue color for the progress display
+            )
+        ],
+        [   
+            InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}", style="success"),  # Green
+            InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}", style="danger"),   # Red
+            InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}", style="primary"), # Blue
+            InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}", style="primary"), # Blue
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}", style="danger"),    # Red
+        ],
     ]
+    return buttons
 
-    mark = second if START else first
 
-    upl = [
+def stream_markup(_, chat_id):
+    buttons = [
         [
-            {
-                "text": f"🌛 {_['H_B_1']}",
-                "callback_data": "help_callback hb1",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_2']}",
-                "callback_data": "help_callback hb2",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_3']}",
-                "callback_data": "help_callback hb3",
-                "style": "primary"
-            },
+            InlineKeyboardButton(text="▷", callback_data=f"ADMIN Resume|{chat_id}", style="success"),  # Green
+            InlineKeyboardButton(text="II", callback_data=f"ADMIN Pause|{chat_id}", style="danger"),   # Red
+            InlineKeyboardButton(text="↻", callback_data=f"ADMIN Replay|{chat_id}", style="primary"), # Blue
+            InlineKeyboardButton(text="‣‣I", callback_data=f"ADMIN Skip|{chat_id}", style="primary"), # Blue
+            InlineKeyboardButton(text="▢", callback_data=f"ADMIN Stop|{chat_id}", style="danger"),    # Red
         ],
-        [
-            {
-                "text": f"🌛 {_['H_B_4']}",
-                "callback_data": "help_callback hb4",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_5']}",
-                "callback_data": "help_callback hb5",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_6']}",
-                "callback_data": "help_callback hb6",
-                "style": "primary"
-            },
-        ],
-        [
-            {
-                "text": f"🌛 {_['H_B_7']}",
-                "callback_data": "help_callback hb7",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_8']}",
-                "callback_data": "help_callback hb8",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_9']}",
-                "callback_data": "help_callback hb9",
-                "style": "primary"
-            },
-        ],
-        [
-            {
-                "text": f"🌛 {_['H_B_10']}",
-                "callback_data": "help_callback hb10",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_11']}",
-                "callback_data": "help_callback hb11",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_12']}",
-                "callback_data": "help_callback hb12",
-                "style": "primary"
-            },
-        ],
-        [
-            {
-                "text": f"🌛 {_['H_B_13']}",
-                "callback_data": "help_callback hb13",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_14']}",
-                "callback_data": "help_callback hb14",
-                "style": "primary"
-            },
-            {
-                "text": f"🌛 {_['H_B_15']}",
-                "callback_data": "help_callback hb15",
-                "style": "primary"
-            },
-        ]
     ]
-
-    if is_sudo:
-        upl.append(
-            [
-                {
-                    "text": "🌛 Ai/TTS/IMAGE",
-                    "callback_data": "help_callback hb16",
-                    "style": "success"
-                }
-            ]
-        )
-
-    upl.append(mark)
-
-    return {"inline_keyboard": upl}
+    return buttons
 
 
-def help_back_markup(_):
+def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"AnonyPlaylists {videoid}|{user_id}|{ptype}|a|{channel}|{fplay}",
+                style="success",  # Green
+            ),
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"AnonyPlaylists {videoid}|{user_id}|{ptype}|v|{channel}|{fplay}",
+                style="success",  # Green
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+                style="danger",  # Red
+            ),
+        ],
+    ]
+    return buttons
 
-    upl = {
-        "inline_keyboard": [
-            [
-                {
-                    "text": f"🌛 {_['BACK_BUTTON']}",
-                    "callback_data": "settings_back_helper",
-                    "style": "primary"
-                }
-            ]
-        ]
-    }
 
-    return upl
+def livestream_markup(_, videoid, user_id, mode, channel, fplay):
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_3"],
+                callback_data=f"LiveStream {videoid}|{user_id}|{mode}|{channel}|{fplay}",
+                style="success",  # Green
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {videoid}|{user_id}",
+                style="danger",  # Red
+            ),
+        ],
+    ]
+    return buttons
 
 
-def private_help_panel(_):
-
-    buttons = {
-        "inline_keyboard": [
-            [
-                {
-                    "text": f"🌛 {_['S_B_4']}",
-                    "url": f"https://t.me/{app.username}?start=help",
-                    "style": "success"
-                }
-            ]
-        ]
-    }
-
+def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
+    query = f"{query[:20]}"
+    buttons = [
+        [
+            InlineKeyboardButton(
+                text=_["P_B_1"],
+                callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}",
+                style="success",  # Green
+            ),
+            InlineKeyboardButton(
+                text=_["P_B_2"],
+                callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}",
+                style="success",  # Green
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="◁",
+                callback_data=f"slider B|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+                style="primary",  # Blue
+            ),
+            InlineKeyboardButton(
+                text=_["CLOSE_BUTTON"],
+                callback_data=f"forceclose {query}|{user_id}",
+                style="danger",  # Red
+            ),
+            InlineKeyboardButton(
+                text="▷",
+                callback_data=f"slider F|{query_type}|{query}|{user_id}|{channel}|{fplay}",
+                style="primary",  # Blue
+            ),
+        ],
+    ]
     return buttons
