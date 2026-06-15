@@ -72,6 +72,10 @@ def stream_markup(_, chat_id):
     ]
     return buttons
 
+response = requests.post(url, json=payload)
+print(response.status_code)
+print(response.text)
+
 
 def playlist_markup(_, videoid, user_id, ptype, channel, fplay):
     buttons = [
