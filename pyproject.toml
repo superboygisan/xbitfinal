@@ -40,4 +40,4 @@ dev = []
 
 # Aur UV ko bola ki normal pyrogram mat uthao, GitHub wala stylish uthao!
 [tool.uv.sources]
-pyrogram = { git = "https://github.com/KurvaDev/KurvaGram" }
+pyrogram = { git = "https://github.com/vsec0/pyrogram" }
