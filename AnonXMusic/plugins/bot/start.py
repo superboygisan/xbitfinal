@@ -26,49 +26,69 @@ from AnonXMusic.utils.database import (
 from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
 
+# ORIGINAL PANELS RE-IMPORTED FOR STRINGS INTEGRATION
+from AnonXMusic.utils.inline import private_panel, start_panel, help_pannel
+
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
-# DYNAMIC COLORFUL & COMPACT START PANEL
-def get_colored_start_panel(chat_id):
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(text="➕ Add Bot", url=f"https://t.me/{app.username}?startgroup=true"),
-            ],
-            [
-                InlineKeyboardButton(text="🎵 Features", callback_data="settings_back_helper"),
-                InlineKeyboardButton(text="🛠️ Settings", callback_data=f"⚙️ Settings|{chat_id}"),
-            ],
-            [
-                InlineKeyboardButton(text="👥 Group", url=config.SUPPORT_CHAT),
-                InlineKeyboardButton(text="👑 Owner", url=f"https://t.me/{config.SUPPORT_CHAT.split('/')[-1]}"),
-            ]
-        ]
-    )
+# HELPER TO MAKE BUTTONS SMALL AND COMPACT (Sleek Style Converter)
+def make_panel_compact(original_markup):
+    if not original_markup or not hasattr(original_markup, "inline_keyboard"):
+        return original_markup
+    
+    new_keyboard = []
+    current_row = []
+    
+    for row in original_markup.inline_keyboard:
+        for button in row:
+            # Agar text bada hai toh use filter karke clean aur small look dena
+            clean_text = button.text.strip("• ").strip("⌗ ")
+            new_btn = InlineKeyboardButton(
+                text=clean_text,
+                url=button.url,
+                callback_data=button.callback_data,
+                switch_inline_query=button.switch_inline_query,
+                switch_inline_query_current_chat=button.switch_inline_query_current_chat
+            )
+            
+            # Row balancing logic for dynamic small layout
+            if "ADD ME" in button.text.upper() or "SOURCE" in button.text.upper():
+                if current_row:
+                    new_keyboard.append(current_row)
+                    current_row = []
+                new_keyboard.append([new_btn])
+            else:
+                current_row.append(new_btn)
+                if len(current_row) == 2:
+                    new_keyboard.append(current_row)
+                    current_row = []
+                    
+    if current_row:
+        new_keyboard.append(current_row)
+        
+    return InlineKeyboardMarkup(new_keyboard)
+
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
-    
-    # Custom colored small panel generate karna
-    out_panel = get_colored_start_panel(message.chat.id)
-
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
+            keyboard = make_panel_compact(help_pannel(_))
             await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
             try:
                 return await message.reply_photo(
                     photo=random.choice(config.START_IMG_URL),
                     caption=_["help_1"].format(config.SUPPORT_CHAT),
-                    reply_markup=out_panel,
+                    reply_markup=keyboard,
                 )
             except:
                 return await message.reply_text(
                     text=_["help_1"].format(config.SUPPORT_CHAT),
-                    reply_markup=out_panel,
+                    reply_markup=keyboard,
                 )
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
@@ -118,21 +138,23 @@ async def start_pm(client, message: Message, _):
                     reply_markup=key,
                 )
     else:
-        # 1. Pehle sticker jayega jaisa aap chahte the
+        # 1. Pehle aapka custom sticker send hoga
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
         
-        # 2. Uske theek baad colored buttons wala control panel khulega (With safety check)
+        # 2. Wapas en.yml ka original panel uthaya aur compact small kiya
+        out = make_panel_compact(private_panel(_))
+        
+        # 3. Photo aur original text language string send ho jayegi
         try:
             await message.reply_photo(
                 photo=random.choice(config.START_IMG_URL),
                 caption=_["start_2"].format(message.from_user.mention, app.mention),
-                reply_markup=out_panel,
+                reply_markup=out,
             )
         except:
-            # Agar image URL crash hai, toh bina tention text message ke sath panel khul jayega!
             await message.reply_text(
                 text=_["start_2"].format(message.from_user.mention, app.mention),
-                reply_markup=out_panel,
+                reply_markup=out,
             )
             
         if await is_on_off(2):
@@ -145,7 +167,7 @@ async def start_pm(client, message: Message, _):
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
-    out = get_colored_start_panel(message.chat.id)
+    out = make_panel_compact(start_panel(_))
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
@@ -203,7 +225,7 @@ async def welcome(client, message: Message):
                         await app.send_message(LOGGER_ID, f"This group has been blacklisted automatically due to myanmar characters in the chat title, description or message \n Title:{ch.title} \n ID:{message.chat.id}")
                         return await app.leave_chat(message.chat.id)
 
-                out = get_colored_start_panel(message.chat.id)
+                out = make_panel_compact(start_panel(_))
                 await message.reply_photo(
                     photo=random.choice(config.START_IMG_URL),
                     caption=_["start_3"].format(
