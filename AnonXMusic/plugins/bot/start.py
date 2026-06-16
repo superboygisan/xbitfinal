@@ -167,7 +167,7 @@ async def welcome(client, message: Message):
                         await app.send_message(LOGGER_ID, f"This group has been blacklisted automatically due to myanmar characters in the chat title, description or message \n Title:{ch.title} \n ID:{message.chat.id}")
                         return await app.leave_chat(message.chat.id)
 
-                out = start_panel(_)
+                start_panel(app.username)
                 await message.reply_photo(
                     photo=random.choice(config.START_IMG_URL),
                     caption=_["start_3"].format(
