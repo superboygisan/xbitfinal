@@ -25,12 +25,12 @@ from AnonXMusic.utils.database import (
 )
 from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
+
+# CRITICAL FIX: Missing imports aur panels ko sahi se import kiya gaya hai
+from AnonXMusic.utils.inline import private_panel, start_panel, help_pannel
+
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
-# Galat syntax (Isse crash ho raha hai):
-# from AnonXMusic.utils.inline.__init__.py import help_back_markup
-
-# Sahi syntax (Isse solve hoga):
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
@@ -89,15 +89,15 @@ async def start_pm(client, message: Message, _):
             if await is_on_off(2):
                 return await app.send_message(
                     chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
+                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>\u1d1b\u0280\u1d00\u1d04\u1d0b \u026a\u0274\u028da\u1d0f\u0280\u1d0d\u1d00\u1d1b\u026a\u1d0f\u0274</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
                 )
     else:
-        out = private_panel(app.username)
+        out = private_panel(_)
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
         await message.reply_photo(
             photo=random.choice(config.START_IMG_URL),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=InlineKeyboardMarkup(out),
+            reply_markup=out,  # FIX: TypeError hatane ke liye double wrap remove kiya
         )
         if await is_on_off(2):
             return await app.send_message(
@@ -109,25 +109,25 @@ async def start_pm(client, message: Message, _):
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
-    out = start_panel(app.username)
+    out = start_panel(_)
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-    )
+            photo=random.choice(config.START_IMG_URL),
+            caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+            reply_markup=out,  # FIX: TypeError hatane ke liye double wrap remove kiya
+        )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
     except SlowmodeWait as e:
-        asyncio.sleep(e.value)
+        await asyncio.sleep(e.value)
         try:
             await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-        )
+                photo=random.choice(config.START_IMG_URL),
+                caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+                reply_markup=out,
+            )
             return await add_served_chat(message.chat.id)
         except:
             return
@@ -167,7 +167,7 @@ async def welcome(client, message: Message):
                         await app.send_message(LOGGER_ID, f"This group has been blacklisted automatically due to myanmar characters in the chat title, description or message \n Title:{ch.title} \n ID:{message.chat.id}")
                         return await app.leave_chat(message.chat.id)
 
-                start_panel(app.username)
+                out = start_panel(_)
                 await message.reply_photo(
                     photo=random.choice(config.START_IMG_URL),
                     caption=_["start_3"].format(
@@ -176,7 +176,7 @@ async def welcome(client, message: Message):
                         message.chat.title,
                         app.mention,
                     ),
-                    reply_markup=InlineKeyboardMarkup(out),
+                    reply_markup=out,
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
