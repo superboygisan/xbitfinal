@@ -174,9 +174,39 @@ queue_6 : "<b>🕚 ᴅᴜʀᴀᴛɪᴏɴ :</b> ᴜɴᴋɴᴏᴡɴ ᴅᴜʀᴀᴛ
 queue_7 : "\nᴄʟɪᴄᴋ ᴏɴ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ᴡʜᴏʟᴇ ǫᴜᴇᴜᴇᴅ ʟɪsᴛ."
 queue_8 : "<b>{0} ᴘʟᴀʏᴇʀ</b>\n\n❄ <b>sᴛʀᴇᴀᴍɪɴɢ :</b> {1}\n\n🔗 <b>sᴛʀᴇᴀᴍ ᴛʏᴘᴇ :</b> {2}\n🥀 <b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :</b> {3}\n{4}"
 
-stream_1 : "➻ <b>⚡ 𝗦𝗧𝗥𝗘𝗔𝗠 𝗔𝗖𝗧𝗜𝗩𝗘</b>\n\n<blockquote>🎧 𝙉𝙤𝙬 𝙥𝙡𝙖𝙮𝙞𝙣𝙜 </blockquote>\n\n🎶 <b>𝚃𝙸𝚃𝙻𝙴 :</b> <a href={0}>{1}</a>\n⏱ <b>𝙳𝚄𝚁𝙰𝚃𝙸𝙾𝙽 :</b> {2} 𝗺𝗶𝗻𝘂𝘁𝗲𝘀\n👤 <b>𝚁𝙴𝚀𝚄𝙴𝚂𝚃𝙴𝙳 𝙱𝚈 :</b> {3}\n\n━━━━━━━━━━━━━━━"
+stream_1 = """➻ ⚡ 𝚂𝚃𝚁𝙴𝙰𝙼 𝙰𝙲𝚃𝙸𝚅𝙴
 
-stream_2 : "➻ <b>⚡ 𝗟𝗜𝗩𝗘 𝗦𝗧𝗥𝗘𝗔𝗠 𝗔𝗖𝗧𝗜𝗩𝗘</b>\n\n<blockquote>📡 𝙇𝙞𝙫𝙚 𝙨𝙩𝙧𝙚𝙖𝙢 𝙞𝙨 𝙣𝙤𝙬 𝙧𝙪𝙣𝙣𝙞𝙣𝙜 𝙨𝙢𝙤𝙤𝙩𝙝𝙡𝙮</blockquote>\n\n🔗 <b>𝚂𝚃𝚁𝙴𝙰𝙼 𝚃𝚈𝙿𝙴 :</b> 𝗟𝗶𝘃𝗲 𝘀𝘁𝗿𝗲𝗮𝗺 [𝗨𝗥𝗟]\n👤 <b>𝚁𝙴𝚀𝚄𝙴𝚂𝚃𝙴𝙳 𝙱𝚈 :</b> {0}\n\n━━━━━━━━━━━━━━━"
+<blockquote>
+♫︎𝑆𝑂𝑁𝐺 𝐼𝑆 𝑃𝐿𝐴𝑌𝐼𝑁𝐺..
+</blockquote>
+
+<blockquote>
+🎵 𝚃𝙸𝚃𝙻𝙴 : <a href="{0}">{1}</a>
+⏳ 𝙳𝚄𝚁𝙰𝚃𝙸𝙾𝙽 : {2} 𝗺𝗶𝗻𝘂𝘁𝗲𝘀
+👤 𝚁𝙴𝚀𝚄𝙴𝚂𝚃𝙴𝙳 𝙱𝚈 : {3}
+</blockquote>
+
+<blockquote>
+🌟 Enjoy the vibe • Stay tuned
+</blockquote>
+"""
+
+stream_2 = """➻ ⚡ 𝗟𝗜𝗩𝗘 𝗦𝗧𝗥𝗘𝗔𝗠 𝗔𝗖𝗧𝗜𝗩𝗘
+
+<blockquote>
+📡 𝙇𝙞𝙫𝙚 𝙨𝙩𝙧𝙚𝙖𝙢 𝙞𝙨 𝙧𝙪𝙣𝙣𝙞𝙣𝙜 𝙨𝙢𝙤𝙤𝙩𝙝𝙡𝙮
+</blockquote>
+
+<blockquote>
+🔴 𝚂𝚃𝚁𝙴𝙰𝙼 𝚃𝚈𝙿𝙴 : 𝗟𝗜𝗩𝗘 𝗦𝗧𝗥𝗘𝗔𝗠
+🔗 𝚂𝚃𝚁𝙴𝙰𝙼 𝚄𝚁𝙻 : {1}
+👤 𝚁𝙴𝚀𝚄𝙴𝚂𝚃𝙴𝙳 𝙱𝚈 : {0}
+</blockquote>
+
+<blockquote>
+🌐 Live • High Quality • No Buffer
+</blockquote>
+━━━━━━━━━━━━━━━━━━━"""
 
 CLOSE_BUTTON  : "ᴄʟᴏsᴇ"
 BACK_BUTTON : "⬅️  ʙᴀᴄᴋ"
