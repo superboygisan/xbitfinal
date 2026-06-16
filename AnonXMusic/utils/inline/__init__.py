@@ -18,7 +18,8 @@ playlist_markup = buttons.playlist_markup
 livestream_markup = buttons.livestream_markup
 slider_markup = buttons.slider_markup
 
-_all_ = [
+# CRITICAL FIX: Python mein double underscore (__) hota hai, single (_) nahi.
+__all__ = [
     "track_markup",
     "stream_markup",
     "stream_markup_timer",
