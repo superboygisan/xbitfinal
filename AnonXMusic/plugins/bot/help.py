@@ -13,12 +13,7 @@ from AnonXMusic.utils.database import get_lang, get_model_settings, update_model
 from AnonXMusic.utils.decorators.language import LanguageStart, languageCB
 
 # __init__.py likhne ki jagah bas folder tak ka path dete hain
-from AnonXMusic.utils.inline.play import Inline
-
-# Baaki sab bilkul perfect hai jo aapne bola
-buttons = Inline()
-help_back_markup = buttons.help_back_markup
-private_help_panel = buttons.private_help_panel
+from AnonXMusic.utils.inline.help import help_back_markup,private_help_panel
 
 from config import BANNED_USERS, START_IMG_URL, SUPPORT_CHAT, YTPROXY_URL
 import config
