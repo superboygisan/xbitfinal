@@ -1,6 +1,5 @@
 from pyrogram import enums, types
 
-
 class Inline:
     def __init__(self):
         self.ikm = types.InlineKeyboardMarkup
@@ -20,15 +19,8 @@ class Inline:
             **kwargs,
         )
 
-    # MAIN PLAYER CONTROLS
-    def controls(
-        self,
-        chat_id: int,
-        status: str = None,
-        timer: str = None,
-        remove: bool = False,
-    ):
-
+    # MAIN PLAYER CONTROLS & STREAM MARKUP (Dono ka kaam yahi karega)
+    def track_markup(self, _, chat_id: int, status: str = None, timer: str = None, remove: bool = False):
         keyboard = []
 
         if status or timer:
@@ -46,99 +38,85 @@ class Inline:
             keyboard.append(
                 [
                     self._button(
-                        text="⏮️",
+                        text="⏮️ Replay",
                         category="primary",
-                        callback_data=f"controls replay {chat_id}",
+                        callback_data=f"ADMIN Replay|{chat_id}",
                     ),
                     self._button(
-                        text="⏸️",
+                        text="⏸️ Pause",
                         category="primary",
-                        callback_data=f"controls pause {chat_id}",
+                        callback_data=f"ADMIN Pause|{chat_id}",
                     ),
                     self._button(
-                        text="▶️",
+                        text="▶️ Resume",
                         category="success",
-                        callback_data=f"controls resume {chat_id}",
+                        callback_data=f"ADMIN Resume|{chat_id}",
                     ),
+                ]
+            )
+            keyboard.append(
+                [
                     self._button(
-                        text="⏭️",
+                        text="⏭️ Skip",
                         category="primary",
-                        callback_data=f"controls skip {chat_id}",
+                        callback_data=f"ADMIN Skip|{chat_id}",
                     ),
                     self._button(
-                        text="⏹️",
+                        text="⏹️ Stop",
                         category="danger",
-                        callback_data=f"controls stop {chat_id}",
+                        callback_data=f"ADMIN Stop|{chat_id}",
                     ),
                 ]
             )
 
-        return self.ikm(keyboard)
+        # Agar Pyrogram list mangta hai toh seedhe list return karega
+        return keyboard
 
-    # TRACK BUTTON
-    def track_markup(
-        self,
-        videoid: str,
-        user_id: int = None,
-    ):
+    # STREAM MARKUP TIMER (Jo callback.py ko loop ke liye chahiye)
+    def stream_markup_timer(self, _, chat_id: int, played: str, duration: str):
+        # Timer strip upar dikhane ke liye
+        timer_text = f"{played} ▬▬▬▬▬▬▬▬▬ {duration}"
+        return self.track_markup(_, chat_id, timer=timer_text)
 
-        keyboard = [
-            [
-                self._button(
-                    text="📺 YouTube",
-                    category="primary",
-                    url=f"https://youtube.com/watch?v={videoid}",
-                )
-            ]
-        ]
+    # BACKUP FOR OTHER MARKUPS TO PREVENT CRASH
+    def playlist_markup(self, _, chat_id: int):
+        return self.track_markup(_, chat_id)
 
-        return self.ikm(keyboard)
+    def livestream_markup(self, _, chat_id: int):
+        return self.track_markup(_, chat_id)
+
+    def slider_markup(self, _, chat_id: int):
+        return self.track_markup(_, chat_id)
 
     # QUEUE BUTTON
-    def queue_markup(
-        self,
-        chat_id: int,
-        text: str,
-        playing: bool = False,
-    ):
-
+    def queue_markup(self, chat_id: int, text: str, playing: bool = False):
         action = "pause" if playing else "resume"
-
         keyboard = [
             [
                 self._button(
                     text=text,
                     category="success" if playing else "danger",
-                    callback_data=f"controls {action} {chat_id} q",
+                    callback_data=f"ADMIN {action.capitalize()}|{chat_id}",
                 )
             ]
         ]
-
         return self.ikm(keyboard)
 
     # FORCE PLAY BUTTON
-    def play_queued(
-        self,
-        chat_id: int,
-        item_id: str,
-        text: str,
-    ):
-
+    def play_queued(self, chat_id: int, item_id: str, text: str):
         keyboard = [
             [
                 self._button(
                     text=text,
                     category="success",
-                    callback_data=f"controls force {chat_id} {item_id}",
+                    callback_data=f"ADMIN Resume|{chat_id}",
                 )
             ]
         ]
-
         return self.ikm(keyboard)
 
     # YOUTUBE BUTTONS
     def yt_key(self, link: str):
-
         keyboard = [
             [
                 self._button(
@@ -153,14 +131,19 @@ class Inline:
                 ),
             ]
         ]
-
         return self.ikm(keyboard)
 
 
 buttons = Inline()
 
-controls = buttons.controls
+# MAPPING FOR BOTH COMPATIBILITY AND STYLING
+controls = buttons.track_markup
 track_markup = buttons.track_markup
+stream_markup = buttons.track_markup
+stream_markup_timer = buttons.stream_markup_timer
+playlist_markup = buttons.playlist_markup
+livestream_markup = buttons.livestream_markup
+slider_markup = buttons.slider_markup
 queue_markup = buttons.queue_markup
 play_queued = buttons.play_queued
 yt_key = buttons.yt_key
