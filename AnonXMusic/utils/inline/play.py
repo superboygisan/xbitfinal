@@ -1,4 +1,4 @@
-```python id="7srqcf"
+
 from pyrogram import enums, types
 
 
@@ -77,4 +77,3 @@ class Inline:
 
 
 inline = Inline()
-```
