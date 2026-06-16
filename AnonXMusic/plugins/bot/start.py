@@ -109,7 +109,7 @@ async def start_pm(client, message: Message, _):
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
-    out = start_panel(_)
+    out = start_panel(app.username)
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
