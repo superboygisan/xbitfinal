@@ -68,7 +68,7 @@ class Inline:
     def stream_markup_timer(self, _, chat_id: int, played: str, duration: str):
         # Normal digits ko mathematical bold script fonts mein convert karne ke liye helper
         def to_script_font(time_str):
-            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': '𝄊'}
+            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': }
             return "".join(font_map.get(c, c) for c in time_str)
 
         try:
@@ -83,7 +83,7 @@ class Inline:
             percentage = 0
 
         # Custom Textile Geometric Curved Track (Bina kisi ordinary text ke)
-        textile_track = ["𝄜", "𝄝", "𝄞", "𝄟", "𝄠", "𝄡", "𝄢", "𝄣", "𝄤", "𝄥"]
+        textile_track = ["▱", "▱", "▱", "▱", "▱", "▱", "▱", "▱", "▱", "▱"]
         total_steps = len(textile_track)
 
         active_pos = math.floor((percentage / 100) * total_steps)
@@ -94,7 +94,7 @@ class Inline:
         for i in range(total_steps):
             if i < active_pos:
                 # Solid matrix flow blocks (Snake tail/body)
-                bar_text += "𝌆" 
+                bar_text += ""▰"" 
             elif i == active_pos:
                 # Moving prism node (Active snake head)
                 bar_text += "𝋃"
@@ -107,7 +107,7 @@ class Inline:
         duration_font = to_script_font(duration)
 
         # Pure graphic layout frame
-        full_graphic_bar = f"𝄃𝄃 {played_font} ❖ {bar_text} ❖ {duration_font} 𝄃𝄃"
+        full_graphic_bar = f"▰ {played_font} ❖ {bar_text} ❖ {duration_font} ▰"
 
         # Action based background color (End phase par automatic Red/Danger ho jayega)
         button_color = "danger" if percentage >= 85 else "success"
