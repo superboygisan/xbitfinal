@@ -31,11 +31,7 @@ from strings import get_string
 # from AnonXMusic.utils.inline.__init__.py import help_back_markup
 
 # Sahi syntax (Isse solve hoga):
-from AnonXMusic.utils.play import Inline
-
-buttons = Inline()
-track_markup = buttons.track_markup
-
+from AnonXMusic.utils.play import track_markup
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
