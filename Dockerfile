@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 1. Saare system tools install karein
+# Install system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
@@ -20,28 +20,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Files copy karein
+# Copy project files
 COPY . /app/
 
-# 3. Pip aur UV ko install/upgrade karein
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir uv
+# Upgrade pip and install uv
+RUN pip install --no-cache-dir --upgrade pip uv
 
-# 4. Ab sirf uv sync chalayein, yeh pyproject.toml se kurigram ko khud utha lega
+# IMPORTANT:
+# Remove old pyrogram if exists
+RUN pip uninstall -y pyrogram || true
+
+# Install dependencies from pyproject.toml
 RUN uv sync
 
+# Force latest kurigram for styled buttons
+RUN pip install --no-cache-dir -U kurigram
 
-RUN pip uninstall pyrogram -y 
-RUN pip uninstall kurigram -y
-RUN pip cache purge
-RUN pip install -U kurigram
-RUN uv sync
-
-
-
-
-# 5. Virtual environment ka path set karein
+# Proper venv path
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Prevent buffered logs
+ENV PYTHONUNBUFFERED=1
+
 CMD ["bash", "start"]
-
-
