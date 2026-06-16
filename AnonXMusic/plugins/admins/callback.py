@@ -3,7 +3,6 @@ import asyncio
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup,CallbackQuery
 
-python id="rnvtga"
 if query.data == "noop":
     return await query.answer()
 
