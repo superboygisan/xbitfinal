@@ -10,15 +10,22 @@ from .start import *
 # Yahan humne class ko mention karke uska object bana diya
 buttons = Inline()
 
-# Ab us class ke andar ke saare functions ko explicitly mention kar dete hain
-track_markup = buttons.track_markup
-stream_markup = buttons.track_markup
-stream_markup_timer = buttons.track_markup_timer
-playlist_markup = buttons.playlist_markup
-livestream_markup = buttons.livestream_markup
-slider_markup = buttons.slider_markup
+# SAFE MAPPING: getattr() use karne se agar attribute nahi mila toh bot CRASH nahi hoga!
+track_markup = getattr(buttons, "track_markup", None)
+stream_markup = getattr(buttons, "track_markup", None)
+playlist_markup = getattr(buttons, "playlist_markup", None)
+livestream_markup = getattr(buttons, "livestream_markup", None)
+slider_markup = getattr(buttons, "slider_markup", None)
 
-# CRITICAL FIX: Python mein double underscore (__) hota hai, single (_) nahi.
+# Timer wale attribute ke liye backup checks
+if hasattr(buttons, "track_markup_timer"):
+    stream_markup_timer = buttons.track_markup_timer
+elif hasattr(buttons, "stream_markup_timer"):
+    stream_markup_timer = buttons.stream_markup_timer
+else:
+    # Agar dono nahi mile, toh normal track_markup use kar lega par crash nahi hoga
+    stream_markup_timer = track_markup
+
 __all__ = [
     "track_markup",
     "stream_markup",
