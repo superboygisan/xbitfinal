@@ -1,4 +1,3 @@
-
 from pyrogram import enums, types
 
 
@@ -21,6 +20,7 @@ class Inline:
             **kwargs,
         )
 
+    # MAIN PLAYER CONTROLS
     def controls(
         self,
         chat_id: int,
@@ -75,5 +75,92 @@ class Inline:
 
         return self.ikm(keyboard)
 
+    # TRACK BUTTON
+    def track_markup(
+        self,
+        videoid: str,
+        user_id: int = None,
+    ):
 
-inline = Inline()
+        keyboard = [
+            [
+                self._button(
+                    text="📺 YouTube",
+                    category="primary",
+                    url=f"https://youtube.com/watch?v={videoid}",
+                )
+            ]
+        ]
+
+        return self.ikm(keyboard)
+
+    # QUEUE BUTTON
+    def queue_markup(
+        self,
+        chat_id: int,
+        text: str,
+        playing: bool = False,
+    ):
+
+        action = "pause" if playing else "resume"
+
+        keyboard = [
+            [
+                self._button(
+                    text=text,
+                    category="success" if playing else "danger",
+                    callback_data=f"controls {action} {chat_id} q",
+                )
+            ]
+        ]
+
+        return self.ikm(keyboard)
+
+    # FORCE PLAY BUTTON
+    def play_queued(
+        self,
+        chat_id: int,
+        item_id: str,
+        text: str,
+    ):
+
+        keyboard = [
+            [
+                self._button(
+                    text=text,
+                    category="success",
+                    callback_data=f"controls force {chat_id} {item_id}",
+                )
+            ]
+        ]
+
+        return self.ikm(keyboard)
+
+    # YOUTUBE BUTTONS
+    def yt_key(self, link: str):
+
+        keyboard = [
+            [
+                self._button(
+                    text="📋 Copy Link",
+                    category="primary",
+                    copy_text=link,
+                ),
+                self._button(
+                    text="🎬 YouTube",
+                    category="danger",
+                    url=link,
+                ),
+            ]
+        ]
+
+        return self.ikm(keyboard)
+
+
+buttons = Inline()
+
+controls = buttons.controls
+track_markup = buttons.track_markup
+queue_markup = buttons.queue_markup
+play_queued = buttons.play_queued
+yt_key = buttons.yt_key
