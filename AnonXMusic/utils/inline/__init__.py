@@ -25,3 +25,5 @@ __all__ = [
     "slider_markup",
     # other imports if needed
 ]
+
+buttons = Inline()
