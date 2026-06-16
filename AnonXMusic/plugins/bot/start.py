@@ -27,7 +27,14 @@ from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
-from AnonXMusic.utils.inline.__init__.py import track_markup
+# Galat syntax (Isse crash ho raha hai):
+# from AnonXMusic.utils.inline.__init__.py import help_back_markup
+
+# Sahi syntax (Isse solve hoga):
+from AnonXMusic.utils.play import Inline
+
+buttons = Inline()
+track_markup = buttons.track_markup
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
