@@ -9,6 +9,8 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from pyrogram.errors.exceptions.not_acceptable_406 import ChannelPrivate
 from pyrogram.errors.exceptions.flood_420 import SlowmodeWait
 
+from AnonXMusic.utils.inline.help import help_back_markup,private_help_panel
+
 from AnonXMusic import app
 from AnonXMusic.misc import _boot_
 from AnonXMusic.utils.database import (
