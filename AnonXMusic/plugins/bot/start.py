@@ -26,13 +26,12 @@ from AnonXMusic.utils.database import (
 from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
 
-# ORIGINAL PANELS RE-IMPORTED FOR STRINGS INTEGRATION
 from AnonXMusic.utils.inline import private_panel, start_panel, help_pannel
 
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
-# HELPER TO MAKE BUTTONS SMALL AND COMPACT (Sleek Style Converter)
+
 def make_panel_compact(original_markup):
     if not original_markup or not hasattr(original_markup, "inline_keyboard"):
         return original_markup
@@ -42,7 +41,6 @@ def make_panel_compact(original_markup):
     
     for row in original_markup.inline_keyboard:
         for button in row:
-            # Agar text bada hai toh use filter karke clean aur small look dena
             clean_text = button.text.strip("• ").strip("⌗ ")
             new_btn = InlineKeyboardButton(
                 text=clean_text,
@@ -52,7 +50,6 @@ def make_panel_compact(original_markup):
                 switch_inline_query_current_chat=button.switch_inline_query_current_chat
             )
             
-            # Row balancing logic for dynamic small layout
             if "ADD ME" in button.text.upper() or "SOURCE" in button.text.upper():
                 if current_row:
                     new_keyboard.append(current_row)
@@ -80,10 +77,12 @@ async def start_pm(client, message: Message, _):
             keyboard = make_panel_compact(help_pannel(_))
             await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
             try:
-                return await message.reply_photo(
-                    photo=random.choice(config.START_IMG_URL),
+                # MP4 Video with Spoiler for Help Command
+                return await message.reply_video(
+                    video=random.choice(config.START_IMG_URL),
                     caption=_["help_1"].format(config.SUPPORT_CHAT),
                     reply_markup=keyboard,
+                    has_spoiler=True,
                 )
             except:
                 return await message.reply_text(
@@ -138,18 +137,18 @@ async def start_pm(client, message: Message, _):
                     reply_markup=key,
                 )
     else:
-        # 1. Pehle aapka custom sticker send hoga
+        # 1. Pehle sticker jayega 
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
         
-        # 2. Wapas en.yml ka original panel uthaya aur compact small kiya
         out = make_panel_compact(private_panel(_))
         
-        # 3. Photo aur original text language string send ho jayegi
+        # 2. MP4 Video high-speed transmission with pixelated SPOILER EFFECT!
         try:
-            await message.reply_photo(
-                photo=random.choice(config.START_IMG_URL),
+            await message.reply_video(
+                video=random.choice(config.START_IMG_URL),
                 caption=_["start_2"].format(message.from_user.mention, app.mention),
                 reply_markup=out,
+                has_spoiler=True, # Yeh line video par digital parda daal degi
             )
         except:
             await message.reply_text(
@@ -170,10 +169,11 @@ async def start_gp(client, message: Message, _):
     out = make_panel_compact(start_panel(_))
     uptime = int(time.time() - _boot_)
     try:
-        await message.reply_photo(
-            photo=random.choice(config.START_IMG_URL),
+        await message.reply_video(
+            video=random.choice(config.START_IMG_URL),
             caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
             reply_markup=out,
+            has_spoiler=True,
         )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
@@ -181,10 +181,11 @@ async def start_gp(client, message: Message, _):
     except SlowmodeWait as e:
         await asyncio.sleep(e.value)
         try:
-            await message.reply_photo(
-                photo=random.choice(config.START_IMG_URL),
+            await message.reply_video(
+                video=random.choice(config.START_IMG_URL),
                 caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
                 reply_markup=out,
+                has_spoiler=True,
             )
             return await add_served_chat(message.chat.id)
         except:
@@ -226,8 +227,8 @@ async def welcome(client, message: Message):
                         return await app.leave_chat(message.chat.id)
 
                 out = make_panel_compact(start_panel(_))
-                await message.reply_photo(
-                    photo=random.choice(config.START_IMG_URL),
+                await message.reply_video(
+                    video=random.choice(config.START_IMG_URL),
                     caption=_["start_3"].format(
                         message.from_user.first_name,
                         app.mention,
@@ -235,6 +236,7 @@ async def welcome(client, message: Message):
                         app.mention,
                     ),
                     reply_markup=out,
+                    has_spoiler=True,
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
