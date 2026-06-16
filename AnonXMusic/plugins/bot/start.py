@@ -22,7 +22,7 @@ from AnonXMusic.utils.database import (
 )
 from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
-from AnonXMusic.utils.inline import private_panel, start_panel, help_pannel
+from AnonXMusic.utils.inline.start import private_panel, start_panel, help_pannel
 
 from config import BANNED_USERS, LOGGER_ID, START_IMG_URL, SUPPORT_CHAT
 from strings import get_string
