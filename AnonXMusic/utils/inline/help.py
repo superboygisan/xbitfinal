@@ -127,15 +127,4 @@ def private_help_panel(_):
     ]
     return buttons
 
-    def track_markup(self, _, videoid, user_id, channel, fplay) -> types.InlineKeyboardMarkup:
-        return self.ikm(
-            [
-                [
-                    self._button(text=_["P_B_1"], category="success", callback_data=f"MusicStream {videoid}|{user_id}|a|{channel}|{fplay}"),
-                    self._button(text=_["P_B_2"], category="primary", callback_data=f"MusicStream {videoid}|{user_id}|v|{channel}|{fplay}")
-                ],
-                [
-                    self._button(text=_["CLOSE_BUTTON"], category="danger", callback_data=f"forceclose {videoid}|{user_id}")
-                ]
-            ]
-        )
+    
