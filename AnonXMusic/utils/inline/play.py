@@ -20,7 +20,7 @@ class Inline:
             **kwargs,
         )
 
-    # MAIN CONTROL HUB (Plain list matrix framework returner)
+    # MAIN CONTROL HUB
     def track_markup(self, _, chat_id: int, status: str = None, timer_row: list = None, remove: bool = False):
         keyboard = []
 
@@ -29,8 +29,8 @@ class Inline:
         elif status:
             keyboard.append([self._button(text=status, category="default", callback_data="noop")])
         else:
-            # Initial placeholder sync matching your layout theme
-            keyboard.append([self._button(text="𝄃𝄃 𝟬𝟬𝄊𝟬𝟬 ❖ 𝋃𝄝𝄞𝄟𝄠𝄡𝄢𝄣𝄤𝄥 ❖ 𝟬𝟬𝄊𝟬𝟬 𝄃𝄃", category="success", callback_data="noop")])
+            # Clean initial loading bar style
+            keyboard.append([self._button(text="⏳ 𝟬values𝟬 ❖ ▬▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬", category="success", callback_data="noop")])
 
         if not remove:
             keyboard.append(
@@ -65,14 +65,13 @@ class Inline:
 
         return keyboard
 
-    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP (Object wrapping securely integrated)
+    # INTERACTIVE PROGRESS LOADING LOOP
     def stream_markup_timer(self, _, chat_id: int, played: str = "00:00", duration: str = "00:00"):
         def to_script_font(time_str):
-            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': '𝄊'}
+            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
             return "".join(font_map.get(c, c) for c in time_str)
 
         try:
-            # Explicitly raw dynamic casting to prevent script map collision
             p_min, p_sec = map(int, str(played).split(":"))
             d_min, d_sec = map(int, str(duration).split(":"))
 
@@ -83,9 +82,8 @@ class Inline:
         except:
             percentage = 0
 
-        textile_track = ["𝄜", "𝄝", "𝄞", "𝄟", "𝄠", "𝄡", "𝄢", "𝄣", "𝄤", "𝄥"]
-        total_steps = len(textile_track)
-
+        # Sleek Loading Matrix
+        total_steps = 10
         active_pos = math.floor((percentage / 100) * total_steps)
         if active_pos >= total_steps:
             active_pos = total_steps - 1
@@ -93,21 +91,21 @@ class Inline:
         bar_text = ""
         for i in range(total_steps):
             if i < active_pos:
-                bar_text += "𝌆" 
+                bar_text += "■"  # Completed loading blocks
             elif i == active_pos:
-                bar_text += "𝋃"
+                bar_text += "▶"  # Head runner loader pointer
             else:
-                bar_text += textile_track[i]
+                bar_text += "▱"  # Empty path remaining
 
         played_font = to_script_font(str(played))
         duration_font = to_script_font(str(duration))
 
-        full_graphic_bar = f"𝄃𝄃 {played_font} ❖ {bar_text} ❖ {duration_font} 𝄃𝄃"
+        # Balanced loading UI format string
+        full_graphic_bar = f"⏳ {played_font} ❖ {bar_text} ❖ {duration_font}"
 
         button_color = "danger" if percentage >= 85 else "success"
         timer_row = [self._button(text=full_graphic_bar, category=button_color, callback_data="noop")]
 
-        # WRAPPED INSIDE ENHANCED OBJECT SPECIFICATION
         return self.ikm(self.track_markup(_, chat_id, timer_row=timer_row))
 
     def stream_markup_fallback(self, _, chat_id: int):
@@ -129,7 +127,7 @@ class Inline:
 
 buttons = Inline()
 
-# FORMAL ALIASING MAPPED FOR EXCLUSIVE INTERFACES
+# HOOK OVERRIDES MAPPED
 controls = buttons.track_markup
 track_markup = buttons.track_markup
 stream_markup = buttons.stream_markup_fallback  
