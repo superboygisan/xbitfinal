@@ -3,6 +3,10 @@ import asyncio
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup,CallbackQuery
 
+python id="rnvtga"
+if query.data == "noop":
+    return await query.answer()
+
 from AnonXMusic import YouTube, app
 from AnonXMusic.core.call import Anony
 from AnonXMusic.misc import SUDOERS, db
