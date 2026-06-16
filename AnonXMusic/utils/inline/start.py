@@ -1,39 +1,77 @@
+```python id="2dcsd2"
+from pyrogram import enums
 from pyrogram.types import InlineKeyboardButton
 
-import config
-from AnonXMusic import app
+from config import OWNER_ID, SUPPORT_CHAT, SUPPORT_CHANNEL
 
 
-def start_panel(_):
-    buttons = [
+def btn(text, style="primary", **kwargs):
+
+    styles = {
+        "primary": enums.ButtonStyle.PRIMARY,
+        "success": enums.ButtonStyle.SUCCESS,
+        "danger": enums.ButtonStyle.DANGER,
+        "default": enums.ButtonStyle.DEFAULT,
+    }
+
+    return InlineKeyboardButton(
+        text=text,
+        style=styles.get(style, enums.ButtonStyle.DEFAULT),
+        **kwargs
+    )
+
+
+def start_panel(bot_username):
+    return [
         [
-            InlineKeyboardButton(
-                text=_["S_B_1"], url=f"https://t.me/{app.username}?startgroup=true"
+            btn(
+                text="➕ Add Me",
+                style="success",
+                url=f"https://t.me/{bot_username}?startgroup=true",
             ),
-            InlineKeyboardButton(text=_["S_B_2"], url=config.SUPPORT_CHAT),
+            btn(
+                text="💬 Support",
+                style="primary",
+                url=SUPPORT_CHAT,
+            ),
         ],
     ]
-    return buttons
 
 
-def private_panel(_):
-    buttons = [
+def private_panel(bot_username):
+    return [
         [
-            InlineKeyboardButton(
-                text=_["S_B_3"],
-                url=f"https://t.me/{app.username}?startgroup=true",
+            btn(
+                text="➕ Add Me To Group",
+                style="success",
+                url=f"https://t.me/{bot_username}?startgroup=true",
             )
         ],
-        [InlineKeyboardButton(text=_["S_B_4"], callback_data="settings_back_helper")],
         [
-            InlineKeyboardButton(text=_["S_B_6"], user_id=config.OWNER_ID),
-            InlineKeyboardButton(text=_["S_B_5"], url=config.SUPPORT_CHANNEL),
+            btn(
+                text="⚙️ Settings",
+                style="primary",
+                callback_data="settings_back_helper",
+            )
         ],
         [
-            InlineKeyboardButton(text=_["S_B_2"], url=config.SUPPORT_CHAT),
+            btn(
+                text="👑 Owner",
+                style="danger",
+                user_id=OWNER_ID,
+            ),
+            btn(
+                text="📢 Channel",
+                style="primary",
+                url=SUPPORT_CHANNEL,
+            ),
         ],
-        [InlineKeyboardButton(text="• sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ •", url=f"https://t.me")],
-
+        [
+            btn(
+                text="💬 Support Chat",
+                style="primary",
+                url=SUPPORT_CHAT,
+            ),
+        ],
     ]
-
-    return buttons
+```
