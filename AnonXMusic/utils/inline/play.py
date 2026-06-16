@@ -62,30 +62,25 @@ class Inline:
                 ]
             )
 
-        return keyboard
+        # Pyrogram InlineKeyboardMarkup structure returns directly here
+        return self.ikm(keyboard) if hasattr(self, "ikm") else keyboard
 
-    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP
+    # INTERACTIVE LOADING BAR WITH HALF MOON POINTER
     def stream_markup_timer(self, _, chat_id: int, played: str, duration: str):
-        # Normal digits ko mathematical bold script fonts mein convert karne ke liye helper
-        def to_script_font(time_str):
-            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': '𝄊'}
-            return "".join(font_map.get(c, c) for c in time_str)
-
         try:
             p_min, p_sec = map(int, played.split(":"))
             d_min, d_sec = map(int, duration.split(":"))
-            
+
             played_seconds = (p_min * 60) + p_sec
             total_seconds = (d_min * 60) + d_sec
-            
+
             percentage = (played_seconds / total_seconds) * 100 if total_seconds > 0 else 0
         except:
             percentage = 0
 
-        # Custom Textile Geometric Curved Track (Bina kisi ordinary text ke)
-        textile_track = ["𝄜", "𝄝", "𝄞", "𝄟", "𝄠", "𝄡", "𝄢", "𝄣", "𝄤", "𝄥"]
-        total_steps = len(textile_track)
-        
+        # Total 12 steps ka premium loading grid
+        total_steps = 12
+
         active_pos = math.floor((percentage / 100) * total_steps)
         if active_pos >= total_steps:
             active_pos = total_steps - 1
@@ -93,23 +88,19 @@ class Inline:
         bar_text = ""
         for i in range(total_steps):
             if i < active_pos:
-                # Solid matrix flow blocks (Snake tail/body)
-                bar_text += "𝌆" 
+                # Loaded Block (Filled area)
+                bar_text += "▰" 
             elif i == active_pos:
-                # Moving prism node (Active snake head)
-                bar_text += "𝋃"
+                # Half Moon Moving Pointer Knob
+                bar_text += "🌓"
             else:
-                # Wave vectors path yet to cover
-                bar_text += textile_track[i]
+                # Empty Block (Buffer area)
+                bar_text += "▱"
 
-        # Script styled counters build karna
-        played_font = to_script_font(played)
-        duration_font = to_script_font(duration)
+        # Ultra Realistic Professional Loading Layout Look
+        full_graphic_bar = f"⏱️ {played} [{bar_text}] {duration}"
 
-        # Pure graphic layout frame
-        full_graphic_bar = f"𝄃𝄃 {played_font} ❖ {bar_text} ❖ {duration_font} 𝄃𝄃"
-        
-        # Action based background color (End phase par automatic Red/Danger ho jayega)
+        # End phase par button automatic Red/Danger ho jayega
         button_color = "danger" if percentage >= 85 else "success"
         timer_row = [self._button(text=full_graphic_bar, category=button_color, callback_data="noop")]
 
