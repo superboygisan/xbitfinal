@@ -1,1 +1,1 @@
-bash start
+worker: python -m AnonXMusic
