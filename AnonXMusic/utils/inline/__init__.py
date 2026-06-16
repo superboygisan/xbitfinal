@@ -12,7 +12,7 @@ buttons = Inline()
 
 # Ab us class ke andar ke saare functions ko explicitly mention kar dete hain
 track_markup = buttons.track_markup
-stream_markup = buttons.stream_markup
+stream_markup = buttons.track_markup
 stream_markup_timer = buttons.stream_markup_timer
 playlist_markup = buttons.playlist_markup
 livestream_markup = buttons.livestream_markup
