@@ -1,4 +1,4 @@
-```python id="2dcsd2"
+
 from pyrogram import enums
 from pyrogram.types import InlineKeyboardButton
 
@@ -74,4 +74,3 @@ def private_panel(bot_username):
             ),
         ],
     ]
-```
