@@ -2,6 +2,7 @@ import time
 import re
 import random
 import asyncio
+import traceback
 
 from pyrogram import filters
 from pyrogram.enums import ChatType
@@ -33,24 +34,46 @@ from strings import get_string
 
 
 def make_panel_compact(original_markup):
-    if not original_markup or not hasattr(original_markup, "inline_keyboard"):
+    # CRITICAL FIX: Safe data extraction to prevent raw list objects
+    if not original_markup:
+        return None
+        
+    raw_keyboard = []
+    if hasattr(original_markup, "inline_keyboard"):
+        raw_keyboard = original_markup.inline_keyboard
+    elif isinstance(original_markup, list):
+        raw_keyboard = original_markup
+    else:
         return original_markup
     
     new_keyboard = []
     current_row = []
     
-    for row in original_markup.inline_keyboard:
+    for row in raw_keyboard:
         for button in row:
-            clean_text = button.text.strip("• ").strip("⌗ ")
+            if isinstance(button, dict):
+                btn_text = button.get("text", "")
+                btn_url = button.get("url")
+                btn_cb = button.get("callback_data")
+                btn_siq = button.get("switch_inline_query")
+                btn_siqc = button.get("switch_inline_query_current_chat")
+            else:
+                btn_text = getattr(button, "text", "")
+                btn_url = getattr(button, "url", None)
+                btn_cb = getattr(button, "callback_data", None)
+                btn_siq = getattr(button, "switch_inline_query", None)
+                btn_siqc = getattr(button, "switch_inline_query_current_chat", None)
+
+            clean_text = btn_text.strip("• ").strip("⌗ ")
             new_btn = InlineKeyboardButton(
                 text=clean_text,
-                url=button.url,
-                callback_data=button.callback_data,
-                switch_inline_query=button.switch_inline_query,
-                switch_inline_query_current_chat=button.switch_inline_query_current_chat
+                url=btn_url,
+                callback_data=btn_cb,
+                switch_inline_query=btn_siq,
+                switch_inline_query_current_chat=btn_siqc
             )
             
-            if "ADD ME" in button.text.upper() or "SOURCE" in button.text.upper():
+            if "ADD ME" in clean_text.upper() or "SOURCE" in clean_text.upper():
                 if current_row:
                     new_keyboard.append(current_row)
                     current_row = []
@@ -64,6 +87,7 @@ def make_panel_compact(original_markup):
     if current_row:
         new_keyboard.append(current_row)
         
+    # FORCE INTERPOLATION INTO INLINEKEYBOARDMARKUP
     return InlineKeyboardMarkup(new_keyboard)
 
 
@@ -76,19 +100,17 @@ async def start_pm(client, message: Message, _):
         if name[0:4] == "help":
             keyboard = make_panel_compact(help_pannel(_))
             await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
+            
+            media_url = random.choice(config.START_IMG_URL)
             try:
-                # MP4 Video with Spoiler for Help Command
-                return await message.reply_video(
-                    video=random.choice(config.START_IMG_URL),
-                    caption=_["help_1"].format(config.SUPPORT_CHAT),
-                    reply_markup=keyboard,
-                    has_spoiler=True,
-                )
-            except:
-                return await message.reply_text(
-                    text=_["help_1"].format(config.SUPPORT_CHAT),
-                    reply_markup=keyboard,
-                )
+                if str(media_url).endswith(".mp4"):
+                    return await message.reply_video(video=media_url, caption=_["help_1"].format(config.SUPPORT_CHAT), reply_markup=keyboard, has_spoiler=True)
+                else:
+                    return await message.reply_photo(photo=media_url, caption=_["help_1"].format(config.SUPPORT_CHAT), reply_markup=keyboard, has_spoiler=True)
+            except Exception as e:
+                print(f"Help Media Error: {e}")
+                return await message.reply_text(text=_["help_1"].format(config.SUPPORT_CHAT), reply_markup=keyboard)
+                
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
             if await is_on_off(2):
@@ -124,36 +146,36 @@ async def start_pm(client, message: Message, _):
             )
             await m.delete()
             try:
-                await app.send_photo(
-                    chat_id=message.chat.id,
-                    photo=thumbnail,
-                    caption=searched_text,
-                    reply_markup=key,
-                )
+                await app.send_photo(chat_id=message.chat.id, photo=thumbnail, caption=searched_text, reply_markup=key)
             except:
-                await app.send_message(
-                    chat_id=message.chat.id,
-                    text=searched_text,
-                    reply_markup=key,
-                )
+                await app.send_message(chat_id=message.chat.id, text=searched_text, reply_markup=key)
     else:
-        # 1. Pehle sticker jayega 
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
         
         out = make_panel_compact(private_panel(_))
+        media_url = random.choice(config.START_IMG_URL)
         
-        # 2. MP4 Video high-speed transmission with pixelated SPOILER EFFECT!
         try:
-            await message.reply_video(
-                video=random.choice(config.START_IMG_URL),
-                caption=_["start_2"].format(message.from_user.mention, app.mention),
-                reply_markup=out,
-                has_spoiler=True, # Yeh line video par digital parda daal degi
-            )
-        except:
+            if str(media_url).endswith(".mp4"):
+                await message.reply_video(
+                    video=media_url,
+                    caption=_["start_2"].format(message.from_user.mention, app.mention),
+                    reply_markup=out,
+                    has_spoiler=True,
+                )
+            else:
+                await message.reply_photo(
+                    photo=media_url,
+                    caption=_["start_2"].format(message.from_user.mention, app.mention),
+                    reply_markup=out,
+                    has_spoiler=True,
+                )
+        except Exception as e:
+            print(f"START PM MEDIA GLITCH: {e}")
             await message.reply_text(
                 text=_["start_2"].format(message.from_user.mention, app.mention),
                 reply_markup=out,
+                disable_web_page_preview=True
             )
             
         if await is_on_off(2):
@@ -168,25 +190,22 @@ async def start_pm(client, message: Message, _):
 async def start_gp(client, message: Message, _):
     out = make_panel_compact(start_panel(_))
     uptime = int(time.time() - _boot_)
+    media_url = random.choice(config.START_IMG_URL)
     try:
-        await message.reply_video(
-            video=random.choice(config.START_IMG_URL),
-            caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-            reply_markup=out,
-            has_spoiler=True,
-        )
+        if str(media_url).endswith(".mp4"):
+            await message.reply_video(video=media_url, caption=_["start_1"].format(app.mention, get_readable_time(uptime)), reply_markup=out, has_spoiler=True)
+        else:
+            await message.reply_photo(photo=media_url, caption=_["start_1"].format(app.mention, get_readable_time(uptime)), reply_markup=out, has_spoiler=True)
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
     except SlowmodeWait as e:
         await asyncio.sleep(e.value)
         try:
-            await message.reply_video(
-                video=random.choice(config.START_IMG_URL),
-                caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-                reply_markup=out,
-                has_spoiler=True,
-            )
+            if str(media_url).endswith(".mp4"):
+                await message.reply_video(video=media_url, caption=_["start_1"].format(app.mention, get_readable_time(uptime)), reply_markup=out, has_spoiler=True)
+            else:
+                await message.reply_photo(photo=media_url, caption=_["start_1"].format(app.mention, get_readable_time(uptime)), reply_markup=out, has_spoiler=True)
             return await add_served_chat(message.chat.id)
         except:
             return
@@ -227,17 +246,11 @@ async def welcome(client, message: Message):
                         return await app.leave_chat(message.chat.id)
 
                 out = make_panel_compact(start_panel(_))
-                await message.reply_video(
-                    video=random.choice(config.START_IMG_URL),
-                    caption=_["start_3"].format(
-                        message.from_user.first_name,
-                        app.mention,
-                        message.chat.title,
-                        app.mention,
-                    ),
-                    reply_markup=out,
-                    has_spoiler=True,
-                )
+                media_url = random.choice(config.START_IMG_URL)
+                if str(media_url).endswith(".mp4"):
+                    await message.reply_video(video=media_url, caption=_["start_3"].format(message.from_user.first_name, app.mention, message.chat.title, app.mention), reply_markup=out, has_spoiler=True)
+                else:
+                    await message.reply_photo(photo=media_url, caption=_["start_3"].format(message.from_user.first_name, app.mention, message.chat.title, app.mention), reply_markup=out, has_spoiler=True)
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
         except Exception as ex:
