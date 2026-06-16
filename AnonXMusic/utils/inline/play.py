@@ -29,8 +29,8 @@ class Inline:
         elif status:
             keyboard.append([self._button(text=status, category="default", callback_data="noop")])
         else:
-            # Fallback placeholder counter bar jab tak dynamic values update na hon
-            keyboard.append([self._button(text="▰ 𝟬𝟬:𝟬𝟬 ❖ 𝋃▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬 ▰", category="success", callback_data="noop")])
+            # Fallback bar row object placement
+            keyboard.append([self._button(text="▬ 𝟬𝟬:𝟬𝟬 ❖ 𝋃𝌀𝌀𝌀𝌀𝌀𝌀𝌀𝌀𝌀 ❖ 𝟬𝟬:𝟬𝟬 ▬", category="success", callback_data="noop")])
 
         if not remove:
             keyboard.append(
@@ -65,7 +65,7 @@ class Inline:
 
         return keyboard
 
-    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP
+    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP (CRITICAL OBJECT WRAPPER FIXED)
     def stream_markup_timer(self, _, chat_id: int, played: str, duration: str):
         def to_script_font(time_str):
             font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
@@ -82,7 +82,8 @@ class Inline:
         except:
             percentage = 0
 
-        textile_track = ["▰", "▱", "▱", "▱", "▱", "▱", "▱", "▱", "▱", "▱"]
+        # Uniform straight blocks for pixel perfect tracking alignment layout
+        textile_track = ["𝌀", "𝌀", "𝌀", "𝌀", "𝌀", "𝌀", "𝌀", "𝌀", "𝌀", "𝌀"]
         total_steps = len(textile_track)
 
         active_pos = math.floor((percentage / 100) * total_steps)
@@ -101,14 +102,15 @@ class Inline:
         played_font = to_script_font(played)
         duration_font = to_script_font(duration)
 
-        full_graphic_bar = f"▰ {played_font} ❖ {bar_text} ❖ {duration_font} ▰"
+        full_graphic_bar = f"▬ {played_font} ❖ {bar_text} ❖ {duration_font} ▬"
 
         button_color = "danger" if percentage >= 85 else "success"
         timer_row = [self._button(text=full_graphic_bar, category=button_color, callback_data="noop")]
 
+        # CRITICAL FIX: Wrapped with self.ikm so Pyrogram background editor task accepts it as valid markup
         return self.ikm(self.track_markup(_, chat_id, timer_row=timer_row))
 
-    # FOR NON-TIMER FALLBACK CALLS (Ensures count bar is returned wrapped)
+    # FOR NON-TIMER INITIALIZATION CALLS
     def stream_markup_fallback(self, _, chat_id: int):
         return self.ikm(self.track_markup(_, chat_id))
 
@@ -128,10 +130,10 @@ class Inline:
 
 buttons = Inline()
 
-# MAPPING ALL VARIABLES FOR FULL PLUGIN COMPATIBILITY
+# MAPPING VARIABLES FOR PLUGINS COMPATIBILITY
 controls = buttons.track_markup
 track_markup = buttons.track_markup
-stream_markup = buttons.stream_markup_fallback  # CRITICAL FIX: Direct fallback router mapped
+stream_markup = buttons.stream_markup_fallback  
 stream_markup_timer = buttons.stream_markup_timer
 playlist_markup = buttons.playlist_markup
 livestream_markup = buttons.livestream_markup
