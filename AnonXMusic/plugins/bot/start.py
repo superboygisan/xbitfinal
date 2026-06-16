@@ -34,10 +34,9 @@ from strings import get_string
 
 
 def make_panel_compact(original_markup):
-    # CRITICAL FIX: Safe data extraction to prevent raw list objects
     if not original_markup:
         return None
-        
+
     raw_keyboard = []
     if hasattr(original_markup, "inline_keyboard"):
         raw_keyboard = original_markup.inline_keyboard
@@ -45,10 +44,10 @@ def make_panel_compact(original_markup):
         raw_keyboard = original_markup
     else:
         return original_markup
-    
+
     new_keyboard = []
     current_row = []
-    
+
     for row in raw_keyboard:
         for button in row:
             if isinstance(button, dict):
@@ -65,14 +64,23 @@ def make_panel_compact(original_markup):
                 btn_siqc = getattr(button, "switch_inline_query_current_chat", None)
 
             clean_text = btn_text.strip("• ").strip("⌗ ")
-            new_btn = InlineKeyboardButton(
-                text=clean_text,
-                url=btn_url,
-                callback_data=btn_cb,
-                switch_inline_query=btn_siq,
-                switch_inline_query_current_chat=btn_siqc
-            )
             
+            # CRITICAL FIX: Safe construction parameter to bypass NoneType writing errors
+            kwargs = {}
+            if btn_url:
+                kwargs["url"] = str(btn_url)
+            elif btn_cb:
+                kwargs["callback_data"] = str(btn_cb)
+            elif btn_siq is not None:
+                kwargs["switch_inline_query"] = str(btn_siq)
+            elif btn_siqc is not None:
+                kwargs["switch_inline_query_current_chat"] = str(btn_siqc)
+            else:
+                # Fallback safeguard button to satisfy raw vector compilation
+                kwargs["callback_data"] = "noop"
+
+            new_btn = InlineKeyboardButton(text=clean_text, **kwargs)
+
             if "ADD ME" in clean_text.upper() or "SOURCE" in clean_text.upper():
                 if current_row:
                     new_keyboard.append(current_row)
@@ -83,11 +91,10 @@ def make_panel_compact(original_markup):
                 if len(current_row) == 2:
                     new_keyboard.append(current_row)
                     current_row = []
-                    
+
     if current_row:
         new_keyboard.append(current_row)
-        
-    # FORCE INTERPOLATION INTO INLINEKEYBOARDMARKUP
+
     return InlineKeyboardMarkup(new_keyboard)
 
 
@@ -100,7 +107,7 @@ async def start_pm(client, message: Message, _):
         if name[0:4] == "help":
             keyboard = make_panel_compact(help_pannel(_))
             await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
-            
+
             media_url = random.choice(config.START_IMG_URL)
             try:
                 if str(media_url).endswith(".mp4"):
@@ -110,7 +117,7 @@ async def start_pm(client, message: Message, _):
             except Exception as e:
                 print(f"Help Media Error: {e}")
                 return await message.reply_text(text=_["help_1"].format(config.SUPPORT_CHAT), reply_markup=keyboard)
-                
+
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
             if await is_on_off(2):
@@ -151,10 +158,10 @@ async def start_pm(client, message: Message, _):
                 await app.send_message(chat_id=message.chat.id, text=searched_text, reply_markup=key)
     else:
         await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
-        
+
         out = make_panel_compact(private_panel(_))
         media_url = random.choice(config.START_IMG_URL)
-        
+
         try:
             if str(media_url).endswith(".mp4"):
                 await message.reply_video(
@@ -177,7 +184,7 @@ async def start_pm(client, message: Message, _):
                 reply_markup=out,
                 disable_web_page_preview=True
             )
-            
+
         if await is_on_off(2):
             return await app.send_message(
                 chat_id=config.LOGGER_ID,
