@@ -28,6 +28,9 @@ class Inline:
             keyboard.append(timer_row)
         elif status:
             keyboard.append([self._button(text=status, category="default", callback_data="noop")])
+        else:
+            # Fallback placeholder counter bar jab tak dynamic values update na hon
+            keyboard.append([self._button(text="▰ 𝟬𝟬:𝟬𝟬 ❖ 𝋃▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬 ▰", category="success", callback_data="noop")])
 
         if not remove:
             keyboard.append(
@@ -62,10 +65,9 @@ class Inline:
 
         return keyboard
 
-    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP (Fixed Wrapper & Map Syntax)
+    # INTERACTIVE MATHEMATICAL GRAPHIC LOOP
     def stream_markup_timer(self, _, chat_id: int, played: str, duration: str):
         def to_script_font(time_str):
-            # FIXED: Added correct mapping for colon character to prevent SyntaxError
             font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
             return "".join(font_map.get(c, c) for c in time_str)
 
@@ -104,21 +106,23 @@ class Inline:
         button_color = "danger" if percentage >= 85 else "success"
         timer_row = [self._button(text=full_graphic_bar, category=button_color, callback_data="noop")]
 
-        # FIXED: Wrapped with self.ikm to return a proper InlineKeyboardMarkup object
         return self.ikm(self.track_markup(_, chat_id, timer_row=timer_row))
 
-    # FIXED ALL BACKUPS: Wrapped with self.ikm for Pyrogram API compliance
+    # FOR NON-TIMER FALLBACK CALLS (Ensures count bar is returned wrapped)
+    def stream_markup_fallback(self, _, chat_id: int):
+        return self.ikm(self.track_markup(_, chat_id))
+
     def playlist_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def livestream_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def slider_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
-    
+
     def queue_markup(self, chat_id: int, text: str, playing: bool = False):
         action = "pause" if playing else "resume"
         return self.ikm([[self._button(text=text, category="success" if playing else "danger", callback_data=f"ADMIN {action.capitalize()}|{chat_id}")]])
-        
+
     def play_queued(self, chat_id: int, item_id: str, text: str):
         return self.ikm([[self._button(text=text, category="success", callback_data=f"ADMIN Resume|{chat_id}")]])
-        
+
     def yt_key(self, link: str):
         return self.ikm([[self._button(text="📋 Copy Link", category="primary", copy_text=link), self._button(text="🎬 YouTube", category="danger", url=link)]])
 
@@ -127,7 +131,7 @@ buttons = Inline()
 # MAPPING ALL VARIABLES FOR FULL PLUGIN COMPATIBILITY
 controls = buttons.track_markup
 track_markup = buttons.track_markup
-stream_markup = buttons.track_markup
+stream_markup = buttons.stream_markup_fallback  # CRITICAL FIX: Direct fallback router mapped
 stream_markup_timer = buttons.stream_markup_timer
 playlist_markup = buttons.playlist_markup
 livestream_markup = buttons.livestream_markup
