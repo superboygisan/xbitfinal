@@ -1,10 +1,7 @@
 import asyncio
 
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup,CallbackQuery
-
-if query.data == "noop":
-    return await query.answer()
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 
 from AnonXMusic import YouTube, app
 from AnonXMusic.core.call import Anony
@@ -22,7 +19,7 @@ from AnonXMusic.utils.database import (
 )
 from AnonXMusic.utils.decorators.language import languageCB
 from AnonXMusic.utils.formatters import seconds_to_min
-from AnonXMusic.utils.inline import close_markup, stream_markup, stream_markup_timer
+from AnonXMusic.utils.inline import close_markup, track_markup, stream_markup_timer
 from AnonXMusic.utils.thumbnails import get_thumb
 from config import (
     BANNED_USERS,
@@ -44,7 +41,7 @@ upvoters = {}
 
 @app.on_callback_query(filters.regex("ADMIN") & ~BANNED_USERS)
 @languageCB
-async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
+async def del_back_playlist(client, CallbackQuery: CallbackQuery, _):
     callback_data = CallbackQuery.data.strip()
     callback_request = callback_data.split(None, 1)[1]
     command, chat = callback_request.split("|")
@@ -231,8 +228,9 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                 await Anony.skip_stream(chat_id, link, video=status, image=image)
             except:
                 return await CallbackQuery.message.reply_text(_["call_6"])
-            button = stream_markup(_, chat_id)
-            img = await get_thumb(videoid,user_id)
+            # SAFE BUTTON CHECK
+            button = track_markup(_, chat_id) if track_markup else []
+            img = await get_thumb(videoid, user_id)
             run = await CallbackQuery.message.reply_photo(
                 photo=img,
                 caption=_["stream_1"].format(
@@ -241,7 +239,7 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                     duration,
                     user,
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=InlineKeyboardMarkup(button) if button else None,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -267,8 +265,9 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                 await Anony.skip_stream(chat_id, file_path, video=status, image=image)
             except:
                 return await mystic.edit_text(_["call_6"])
-            button = stream_markup(_, chat_id)
-            img = await get_thumb(videoid,user_id)
+            # SAFE BUTTON CHECK
+            button = track_markup(_, chat_id) if track_markup else []
+            img = await get_thumb(videoid, user_id)
             run = await CallbackQuery.message.reply_photo(
                 photo=img,
                 caption=_["stream_1"].format(
@@ -277,7 +276,7 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                     duration,
                     user,
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=InlineKeyboardMarkup(button) if button else None,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
@@ -288,11 +287,12 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                 await Anony.skip_stream(chat_id, videoid, video=status)
             except:
                 return await CallbackQuery.message.reply_text(_["call_6"])
-            button = stream_markup(_, chat_id)
+            # SAFE BUTTON CHECK
+            button = track_markup(_, chat_id) if track_markup else []
             run = await CallbackQuery.message.reply_photo(
                 photo=STREAM_IMG_URL,
                 caption=_["stream_2"].format(user),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=InlineKeyboardMarkup(button) if button else None,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -312,7 +312,7 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
             except:
                 return await CallbackQuery.message.reply_text(_["call_6"])
             if videoid == "telegram":
-                button = stream_markup(_, chat_id)
+                button = track_markup(_, chat_id) if track_markup else []
                 run = await CallbackQuery.message.reply_photo(
                     photo=TELEGRAM_AUDIO_URL
                     if str(streamtype) == "audio"
@@ -320,26 +320,24 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                     caption=_["stream_1"].format(
                         SUPPORT_CHAT, title[:23], duration, user
                     ),
-                    reply_markup=InlineKeyboardMarkup(button),
+                    reply_markup=InlineKeyboardMarkup(button) if button else None,
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
             elif videoid == "soundcloud":
-                button = stream_markup(_, chat_id)
+                button = track_markup(_, chat_id) if track_markup else []
                 run = await CallbackQuery.message.reply_photo(
                     photo=SOUNCLOUD_IMG_URL
                     if str(streamtype) == "audio"
                     else TELEGRAM_VIDEO_URL,
-                    caption=_["stream_1"].format(
-                        SUPPORT_CHAT, title[:23], duration, user
-                    ),
-                    reply_markup=InlineKeyboardMarkup(button),
+                    caption=_["stream_2"].format(user),
+                    reply_markup=InlineKeyboardMarkup(button) if button else None,
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
             else:
-                button = stream_markup(_, chat_id)
-                img = await get_thumb(videoid,user_id)
+                button = track_markup(_, chat_id) if track_markup else []
+                img = await get_thumb(videoid, user_id)
                 run = await CallbackQuery.message.reply_photo(
                     photo=img,
                     caption=_["stream_1"].format(
@@ -348,11 +346,17 @@ async def del_back_playlist(client, CallbackQuery:CallbackQuery, _):
                         duration,
                         user,
                     ),
-                    reply_markup=InlineKeyboardMarkup(button),
+                    reply_markup=InlineKeyboardMarkup(button) if button else None,
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
             await CallbackQuery.edit_message_text(txt, reply_markup=close_markup(_))
+
+
+# Noop callback handling for empty/blank buttons
+@app.on_callback_query(filters.regex("noop"))
+async def noop_callback(_, query: CallbackQuery):
+    await query.answer()
 
 
 async def markup_timer():
@@ -384,15 +388,16 @@ async def markup_timer():
                 except:
                     _ = get_string("en")
                 try:
-                    buttons = stream_markup_timer(
-                        _,
-                        chat_id,
-                        seconds_to_min(playing[0]["played"]),
-                        playing[0]["dur"],
-                    )
-                    await mystic.edit_reply_markup(
-                        reply_markup=InlineKeyboardMarkup(buttons)
-                    )
+                    if stream_markup_timer:
+                        buttons = stream_markup_timer(
+                            _,
+                            chat_id,
+                            seconds_to_min(playing[0]["played"]),
+                            playing[0]["dur"],
+                        )
+                        await mystic.edit_reply_markup(
+                            reply_markup=InlineKeyboardMarkup(buttons)
+                        )
                 except:
                     continue
             except:
