@@ -7,7 +7,7 @@ from .speed import *
 from .start import *
 
 # Explicitly import all functions from play.py to avoid ImportError
-from play import (
+from .play import (
 track_markup,
 stream_markup,
 stream_markup_timer,
