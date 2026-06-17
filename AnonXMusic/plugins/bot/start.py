@@ -30,63 +30,6 @@ from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
 
 
-def make_panel_compact(original_markup):
-    if not original_markup:
-        return None
-
-    if hasattr(original_markup, "inline_keyboard"):
-        raw_keyboard = original_markup.inline_keyboard
-    elif isinstance(original_markup, list):
-        raw_keyboard = original_markup
-    else:
-        return original_markup
-
-    new_keyboard = []
-    current_row = []
-
-    for row in raw_keyboard:
-        for button in row:
-            if not button:
-                continue
-
-            if isinstance(button, dict):
-                btn_text = button.get("text", "")
-                btn_url = button.get("url")
-                btn_cb = button.get("callback_data")
-            else:
-                btn_text = getattr(button, "text", "")
-                btn_url = getattr(button, "url", None)
-                btn_cb = getattr(button, "callback_data", None)
-
-            clean_text = str(btn_text).strip("• ").strip("⌗ ")
-            kwargs = {}
-
-            if btn_url:
-                kwargs["url"] = btn_url
-            elif btn_cb:
-                kwargs["callback_data"] = btn_cb
-            else:
-                kwargs["callback_data"] = "noop"
-
-            new_btn = InlineKeyboardButton(text=clean_text, **kwargs)
-
-            if "ADD ME" in clean_text.upper():
-                if current_row:
-                    new_keyboard.append(current_row)
-                    current_row = []
-                new_keyboard.append([new_btn])
-            else:
-                current_row.append(new_btn)
-                if len(current_row) == 2:
-                    new_keyboard.append(current_row)
-                    current_row = []
-
-    if current_row:
-        new_keyboard.append(current_row)
-
-    return InlineKeyboardMarkup(new_keyboard)
-
-
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
@@ -99,7 +42,7 @@ async def start_pm(client, message: Message, _):
             return await message.reply_photo(
                 photo=random.choice(config.START_IMG_URL),
                 caption=_["help_1"].format(config.SUPPORT_CHAT),
-                reply_markup=make_panel_compact(keyboard),
+                reply_markup=keyboard,
             )
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
@@ -139,7 +82,7 @@ async def start_pm(client, message: Message, _):
                 chat_id=message.chat.id,
                 photo=thumbnail,
                 caption=searched_text,
-                reply_markup=make_panel_compact(key),
+                reply_markup=key,
             )
             if await is_on_off(2):
                 return await app.send_message(
@@ -152,7 +95,7 @@ async def start_pm(client, message: Message, _):
         await message.reply_photo(
             photo=random.choice(config.START_IMG_URL),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=make_panel_compact(out),
+            reply_markup=InlineKeyboardMarkup(out),
         )
         if await is_on_off(2):
             return await app.send_message(
@@ -168,21 +111,21 @@ async def start_gp(client, message: Message, _):
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
-            photo=random.choice(config.START_IMG_URL),
-            caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-            reply_markup=make_panel_compact(out),
-        )
+        photo=random.choice(config.START_IMG_URL),
+        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+        reply_markup=InlineKeyboardMarkup(out),
+    )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
     except SlowmodeWait as e:
-        await asyncio.sleep(e.value)
+        asyncio.sleep(e.value)
         try:
             await message.reply_photo(
-                photo=random.choice(config.START_IMG_URL),
-                caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-                reply_markup=make_panel_compact(out),
-            )
+        photo=random.choice(config.START_IMG_URL),
+        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+        reply_markup=InlineKeyboardMarkup(out),
+        )
             return await add_served_chat(message.chat.id)
         except:
             return
@@ -231,7 +174,7 @@ async def welcome(client, message: Message):
                         message.chat.title,
                         app.mention,
                     ),
-                    reply_markup=make_panel_compact(out),
+                    reply_markup=InlineKeyboardMarkup(out),
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
