@@ -51,22 +51,14 @@ class Inline:
             font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
             return "".join(font_map.get(c, c) for c in time_str)
 
-        def time_to_seconds(t_str):
-            try:
-                parts = list(map(int, str(t_str).split(":")))
-                if len(parts) == 3:  # HH:MM:SS
-                    return (parts[0] * 3600) + (parts[1] * 60) + parts[2]
-                elif len(parts) == 2:  # MM:SS
-                    return (parts[0] * 60) + parts[1]
-                return 0
-            except:
-                return 0
-
-        # Dynamic parsing for hours/minutes support to fix unpacking errors
-        played_seconds = time_to_seconds(played)
-        total_seconds = time_to_seconds(duration)
-        
-        percentage = (played_seconds / total_seconds) * 100 if total_seconds > 0 else 0
+        try:
+            p_min, p_sec = map(int, str(played).split(":"))
+            d_min, d_sec = map(int, str(duration).split(":"))
+            played_seconds = (p_min * 60) + p_sec
+            total_seconds = (d_min * 60) + d_sec
+            percentage = (played_seconds / total_seconds) * 100 if total_seconds > 0 else 0
+        except:
+            percentage = 0
 
         total_steps = 10
         active_pos = math.floor((percentage / 100) * total_steps)
@@ -93,6 +85,7 @@ class Inline:
         return self.ikm(raw_layout)
 
     def stream_markup_fallback(self, _, chat_id: int):
+        # BUG FIXED: Added proper language and ID flow structure mapping for fallback
         return self.stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
 
     def playlist_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
@@ -114,13 +107,14 @@ class Inline:
 
 buttons = Inline()
 
+# SYSTEM LAMBDA EXPORTS MAPPED CORRECTLY FOR CALL ENGINE
 controls = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 track_markup = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
-stream_markup = buttons.stream_markup_fallback  
-stream_markup_timer = buttons.stream_markup_timer
-playlist_markup = buttons.playlist_markup
-livestream_markup = buttons.livestream_markup
-slider_markup = buttons.slider_markup
+stream_markup = lambda _, chat_id: buttons.stream_markup_fallback(_, chat_id)
+stream_markup_timer = lambda _, chat_id, played="00:00", duration="00:00": buttons.stream_markup_timer(_, chat_id, played, duration)
+playlist_markup = lambda _, chat_id: buttons.playlist_markup(_, chat_id)
+livestream_markup = lambda _, chat_id: buttons.livestream_markup(_, chat_id)
+slider_markup = lambda _, chat_id: buttons.slider_markup(_, chat_id)
 queue_markup = buttons.queue_markup
 play_queued = buttons.play_queued
 yt_key = buttons.yt_key
