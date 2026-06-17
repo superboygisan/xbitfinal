@@ -13,7 +13,7 @@ from ntgcalls import TelegramServerError, FFmpegError
 from pytgcalls.types import Update, StreamEnded
 from pytgcalls import filters as fl
 from pytgcalls.types import AudioQuality, VideoQuality
-from pytgcalls.types import MediaStream,ChatUpdate
+from pytgcalls.types import MediaStream, ChatUpdate
 from pytgcalls.types.calls import GroupCallConfig
 
 import config
@@ -37,6 +37,9 @@ from AnonXMusic.utils.formatters import check_duration, seconds_to_min, speed_co
 from AnonXMusic.utils.thumbnails import get_thumb
 from strings import get_string
 from AnonXMusic.platforms.Youtube import cookie_txt_file
+
+# Absolute dynamic layouts connected safely
+from AnonXMusic.utils.inline.play import stream_markup_timer, stream_markup
 
 autoend = {}
 counter = {}
@@ -100,6 +103,44 @@ class Call(PyTgCalls):
             self.userbot5,
             cache_duration=100,
         )
+        self.active_workers = {}
+
+    async def timer_worker_loop(self, chat_id: int, assistant, mystic, total_duration, _):
+        """Automated real-time task manager loop to keep count/progress bar fluid."""
+        self.active_workers[chat_id] = True
+        current_seconds = 0
+        
+        try:
+            total_parts = list(map(int, str(total_duration).split(":")))
+            if len(total_parts) == 3:
+                total_secs = (total_parts[0] * 3600) + (total_parts[1] * 60) + total_parts[2]
+            elif len(total_parts) == 2:
+                total_secs = (total_parts[0] * 60) + total_parts[1]
+            else:
+                total_secs = 0
+        except:
+            total_secs = 0
+
+        while chat_id in self.active_workers and db.get(chat_id):
+            await asyncio.sleep(5)
+            
+            # Check if group call is still running fine
+            if not db.get(chat_id) or not self.active_workers.get(chat_id):
+                break
+                
+            current_seconds += 5
+            if total_secs > 0 and current_seconds > total_secs:
+                break
+                
+            played_str = seconds_to_min(current_seconds)
+            try:
+                db[chat_id][0]["played"] = current_seconds
+                updated_markup = stream_markup_timer(_, chat_id, played=played_str, duration=total_duration)
+                await mystic.edit_reply_markup(reply_markup=updated_markup)
+            except Exception as e:
+                # Silently catch FloodWaits / MessageNotModified
+                if "MessageNotModified" not in str(e):
+                    pass
 
     async def pause_stream(self, chat_id: int):
         assistant = await group_assistant(self, chat_id)
@@ -110,6 +151,7 @@ class Call(PyTgCalls):
         await assistant.resume(chat_id)
 
     async def stop_stream(self, chat_id: int):
+        self.active_workers.pop(chat_id, None)
         assistant = await group_assistant(self, chat_id)
         try:
             await _clear_(chat_id)
@@ -118,6 +160,7 @@ class Call(PyTgCalls):
             pass
 
     async def stop_stream_force(self, chat_id: int):
+        self.active_workers.pop(chat_id, None)
         try:
             if config.STRING1:
                 await self.one.leave_call(chat_id)
@@ -220,6 +263,7 @@ class Call(PyTgCalls):
             db[chat_id][0]["speed"] = speed
 
     async def force_stop_stream(self, chat_id: int):
+        self.active_workers.pop(chat_id, None)
         assistant = await group_assistant(self, chat_id)
         try:
             check = db.get(chat_id)
@@ -248,7 +292,7 @@ class Call(PyTgCalls):
                 video_parameters=VideoQuality.SD_480p,
             )
         else:
-            stream = MediaStream(link, audio_parameters=AudioQuality.HIGH,video_flags=MediaStream.Flags.IGNORE)
+            stream = MediaStream(link, audio_parameters=AudioQuality.HIGH, video_flags=MediaStream.Flags.IGNORE)
         await assistant.play(
             chat_id,
             stream,
@@ -294,25 +338,20 @@ class Call(PyTgCalls):
         language = await get_lang(chat_id)
         _ = get_string(language)
         if video:
-            stream= MediaStream(
+            stream = MediaStream(
                 link,
-                audio_parameters=AudioQuality.HIGH,video_parameters=VideoQuality.SD_480p
-                )
-            # stream = AudioVideoPiped(
-            #     link,
-            #     audio_parameters=HighQualityAudio(),
-            #     video_parameters=MediumQualityVideo(),
-            # )
+                audio_parameters=AudioQuality.HIGH, video_parameters=VideoQuality.SD_480p
+            )
         else:
             stream = (
                 MediaStream(
                     link,
                     audio_parameters=AudioQuality.HIGH,
                     video_parameters=VideoQuality.SD_480p,
-                    
+
                 )
                 if video
-                else MediaStream(link, audio_parameters=AudioQuality.HIGH,video_flags=MediaStream.Flags.IGNORE)
+                else MediaStream(link, audio_parameters=AudioQuality.HIGH, video_flags=MediaStream.Flags.IGNORE)
             )
         try:
             await assistant.play(
@@ -320,11 +359,6 @@ class Call(PyTgCalls):
                 stream,
                 config=GroupCallConfig(auto_start=False),
             )
-            # await assistant.join_group_call(
-            #     chat_id,
-            #     stream,
-            #     stream_type=StreamType().pulse_stream,
-            # )
         except NoActiveGroupCall:
             raise AssistantErr(_["call_8"])
         except FFmpegError:
@@ -345,6 +379,7 @@ class Call(PyTgCalls):
                 autoend[chat_id] = datetime.now() + timedelta(minutes=1)
 
     async def change_stream(self, client, chat_id):
+        self.active_workers.pop(chat_id, None)  # Old worker cleared safely
         check = db.get(chat_id)
         popped = None
         loop = await get_loop(chat_id)
@@ -377,13 +412,16 @@ class Call(PyTgCalls):
             streamtype = check[0]["streamtype"]
             videoid = check[0]["vidid"]
             db[chat_id][0]["played"] = 0
+            total_duration = check[0]["dur"]
             exis = (check[0]).get("old_dur")
             if exis:
                 db[chat_id][0]["dur"] = exis
                 db[chat_id][0]["seconds"] = check[0]["old_second"]
                 db[chat_id][0]["speed_path"] = None
                 db[chat_id][0]["speed"] = 1.0
+                total_duration = exis
             video = True if str(streamtype) == "video" else False
+            
             if "live_" in queued:
                 n, link = await YouTube.video(videoid, True)
                 if n == 0:
@@ -410,7 +448,7 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await get_thumb(videoid,user_id)
+                img = await get_thumb(videoid, user_id)
                 button = stream_markup(_, chat_id)
                 run = await app.send_photo(
                     chat_id=original_chat_id,
@@ -418,13 +456,15 @@ class Call(PyTgCalls):
                     caption=_["stream_1"].format(
                         f"https://t.me/{app.username}?start=info_{videoid}",
                         title[:23],
-                        check[0]["dur"],
+                        total_duration,
                         user,
                     ),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
+                asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
+                
             elif "vid_" in queued:
                 mystic = await app.send_message(original_chat_id, _["call_7"])
                 try:
@@ -457,7 +497,7 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await get_thumb(videoid,user_id)
+                img = await get_thumb(videoid, user_id)
                 button = stream_markup(_, chat_id)
                 await mystic.delete()
                 run = await app.send_photo(
@@ -466,13 +506,15 @@ class Call(PyTgCalls):
                     caption=_["stream_1"].format(
                         f"https://t.me/{app.username}?start=info_{videoid}",
                         title[:23],
-                        check[0]["dur"],
+                        total_duration,
                         user,
                     ),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
+                asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
+                
             elif "index_" in queued:
                 stream = (
                     MediaStream(
@@ -499,6 +541,8 @@ class Call(PyTgCalls):
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "tg"
+                asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
+                
             else:
                 if video:
                     stream = MediaStream(
@@ -527,26 +571,28 @@ class Call(PyTgCalls):
                         if str(streamtype) == "audio"
                         else config.TELEGRAM_VIDEO_URL,
                         caption=_["stream_1"].format(
-                            config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
+                            config.SUPPORT_CHAT, title[:23], total_duration, user
                         ),
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
+                    asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
                 elif videoid == "soundcloud":
                     button = stream_markup(_, chat_id)
                     run = await app.send_photo(
                         chat_id=original_chat_id,
                         photo=config.SOUNCLOUD_IMG_URL,
                         caption=_["stream_1"].format(
-                            config.SUPPORT_CHAT, title[:23], check[0]["dur"], user
+                            config.SUPPORT_CHAT, title[:23], total_duration, user
                         ),
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
+                    asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
                 else:
-                    img = await get_thumb(videoid,user_id)
+                    img = await get_thumb(videoid, user_id)
                     button = stream_markup(_, chat_id)
                     run = await app.send_photo(
                         chat_id=original_chat_id,
@@ -554,82 +600,11 @@ class Call(PyTgCalls):
                         caption=_["stream_1"].format(
                             f"https://t.me/{app.username}?start=info_{videoid}",
                             title[:23],
-                            check[0]["dur"],
+                            total_duration,
                             user,
                         ),
                         reply_markup=InlineKeyboardMarkup(button),
                     )
                     db[chat_id][0]["mystic"] = run
-                    db[chat_id][0]["markup"] = "stream"
-
-    async def ping(self):
-        pings = []
-        if config.STRING1:
-            pings.append(self.one.ping)
-        if config.STRING2:
-            pings.append(self.two.ping)
-        if config.STRING3:
-            pings.append(self.three.ping)
-        if config.STRING4:
-            pings.append(self.four.ping)
-        if config.STRING5:
-            pings.append(self.five.ping)
-        return str(round(sum(pings) / len(pings), 3))
-
-    async def start(self):
-        LOGGER(__name__).info("Starting PyTgCalls Client...\n")
-        if config.STRING1:
-            await self.one.start()
-        if config.STRING2:
-            await self.two.start()
-        if config.STRING3:
-            await self.three.start()
-        if config.STRING4:
-            await self.four.start()
-        if config.STRING5:
-            await self.five.start()
-
-    async def decorators(self):
-        @self.one.on_update(
-                fl.chat_update(
-                    ChatUpdate.Status.KICKED | 
-                    ChatUpdate.Status.LEFT_GROUP | 
-                    ChatUpdate.Status.CLOSED_VOICE_CHAT
-                    ))
-        @self.two.on_update(
-                fl.chat_update(
-                    ChatUpdate.Status.KICKED | 
-                    ChatUpdate.Status.LEFT_GROUP | 
-                    ChatUpdate.Status.CLOSED_VOICE_CHAT
-                    ))
-        @self.three.on_update(
-                fl.chat_update(
-                    ChatUpdate.Status.KICKED | 
-                    ChatUpdate.Status.LEFT_GROUP | 
-                    ChatUpdate.Status.CLOSED_VOICE_CHAT
-                    ))
-        @self.four.on_update(
-                fl.chat_update(
-                    ChatUpdate.Status.KICKED | 
-                    ChatUpdate.Status.LEFT_GROUP | 
-                    ChatUpdate.Status.CLOSED_VOICE_CHAT
-                    ))
-        @self.five.on_update(
-                fl.chat_update(
-                    ChatUpdate.Status.KICKED | 
-                    ChatUpdate.Status.LEFT_GROUP | 
-                    ChatUpdate.Status.CLOSED_VOICE_CHAT
-                    ))
-        async def stream_services_handler(client, update: Update):
-            await self.stop_stream(update.chat_id)
-
-        @self.one.on_update(fl.stream_end())
-        @self.two.on_update(fl.stream_end())
-        @self.three.on_update(fl.stream_end())
-        @self.four.on_update(fl.stream_end())
-        @self.five.on_update(fl.stream_end())
-        async def stream_end_handler1(client:PyTgCalls, update: StreamEnded):
-            await self.change_stream(client, update.chat_id)
-
-
-Anony = Call()
+                    db[chat_id][0]["markup"] = "tg"
+                    asyncio.create_task(self.timer_worker_loop(chat_id, client, run, total_duration, _))
