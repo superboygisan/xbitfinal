@@ -107,13 +107,17 @@ async def start_pm(client, message: Message, _):
 
     await asyncio.sleep(0.5)
 
-    # ---------------- BUTTONS ----------------
+    # ---------------- BUTTONS PARSING (FIXED CONNECTION) ----------------
     try:
-        raw_buttons = private_panel(_)
+        # Pass app.username instead of language string object to fix crash
+        raw_buttons = private_panel(app.username)
         out = make_panel_compact(raw_buttons)
     except Exception as e:
         print(f"BUTTON COMPACT ERROR: {e}")
-        out = InlineKeyboardMarkup(private_panel(_))
+        try:
+            out = InlineKeyboardMarkup(private_panel(app.username))
+        except:
+            out = None
 
     # ---------------- MEDIA ----------------
     try:
@@ -121,7 +125,7 @@ async def start_pm(client, message: Message, _):
     except:
         media_url = None
 
-    # ---------------- SEND ----------------
+    # ---------------- SEND EXECUTION ----------------
     try:
         if media_url and str(media_url).endswith(".mp4"):
             await message.reply_video(
@@ -183,9 +187,10 @@ async def start_pm(client, message: Message, _):
 async def start_gp(client, message: Message, _):
 
     try:
-        out = make_panel_compact(start_panel(_))
+        # Pass app.username here as well to keep group panel safe
+        out = make_panel_compact(start_panel(app.username))
     except:
-        out = InlineKeyboardMarkup(start_panel(_))
+        out = InlineKeyboardMarkup(start_panel(app.username))
         
     uptime = int(time.time() - _boot_)
 
