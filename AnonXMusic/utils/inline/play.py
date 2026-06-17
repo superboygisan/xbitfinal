@@ -1,6 +1,8 @@
 import math
 from pyrogram import enums, types
 
+from AnonXMusic.utils.inline.play import stream_markup_timer, stream_markup
+
 class Inline:
     def __init__(self):
         self.ikm = types.InlineKeyboardMarkup
