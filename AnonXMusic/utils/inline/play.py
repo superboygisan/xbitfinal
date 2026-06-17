@@ -24,11 +24,9 @@ class Inline:
             **kwargs,
         )
 
-    # MAIN CONTROL HUB (Ab isme hamesha default bar embedded rahega)
     def track_markup(self, _, chat_id: int, status: str = None, timer_row: list = None, remove: bool = False):
         keyboard = []
 
-        # JAD SE FIX: Agar koi bhi row nahi aa rahi, toh default loading bar compulsory append hoga
         if timer_row:
             keyboard.append(timer_row)
         elif status:
@@ -39,37 +37,15 @@ class Inline:
         if not remove:
             keyboard.append(
                 [
-                    self._button(
-                        text="▶️",
-                        category="success",
-                        callback_data=f"ADMIN Resume|{chat_id}",
-                    ),
-                    self._button(
-                        text="⏮️",
-                        category="primary",
-                        callback_data=f"ADMIN Replay|{chat_id}",
-                    ),
-                    self._button(
-                        text="⏸️",
-                        category="primary",
-                        callback_data=f"ADMIN Pause|{chat_id}",
-                    ),
-                    self._button(
-                        text="⏭️",
-                        category="primary",
-                        callback_data=f"ADMIN Skip|{chat_id}",
-                    ),
-                    self._button(
-                        text="⏹️",
-                        category="danger",
-                        callback_data=f"ADMIN Stop|{chat_id}",
-                    ),
+                    self._button(text="▶️", category="success", callback_data=f"ADMIN Resume|{chat_id}"),
+                    self._button(text="⏮️", category="primary", callback_data=f"ADMIN Replay|{chat_id}"),
+                    self._button(text="⏸️", category="primary", callback_data=f"ADMIN Pause|{chat_id}"),
+                    self._button(text="⏭️", category="primary", callback_data=f"ADMIN Skip|{chat_id}"),
+                    self._button(text="⏹️", category="danger", callback_data=f"ADMIN Stop|{chat_id}"),
                 ]
             )
-
         return keyboard
 
-    # INTERACTIVE PROGRESS LOADING LOOP
     def stream_markup_timer(self, _, chat_id: int, played: str = "00:00", duration: str = "00:00"):
         def to_script_font(time_str):
             font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
@@ -78,10 +54,8 @@ class Inline:
         try:
             p_min, p_sec = map(int, str(played).split(":"))
             d_min, d_sec = map(int, str(duration).split(":"))
-
             played_seconds = (p_min * 60) + p_sec
             total_seconds = (d_min * 60) + d_sec
-
             percentage = (played_seconds / total_seconds) * 100 if total_seconds > 0 else 0
         except:
             percentage = 0
@@ -96,13 +70,12 @@ class Inline:
             if i < active_pos:
                 bar_text += "■"
             elif i == active_pos:
-                bar_text += "🌛"
+                bar_text += "▶"
             else:
                 bar_text += "▱"
 
         played_font = to_script_font(str(played))
         duration_font = to_script_font(str(duration))
-
         full_graphic_bar = f"⏳ {played_font} ❖ {bar_text} ❖ {duration_font}"
 
         button_color = "danger" if percentage >= 85 else "success"
@@ -113,7 +86,6 @@ class Inline:
     def stream_markup_fallback(self, _, chat_id: int):
         return self.stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
 
-    # SARE METHODS ME SE DIRECT LIST HATA KAR SEEDHE IKM COMPONENT WRAP KAR DIYA
     def playlist_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def livestream_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def slider_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
@@ -133,7 +105,6 @@ class Inline:
 
 buttons = Inline()
 
-# DYNAMIC OVERWRITE FOR MAXIMUM RECOVERY
 controls = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 track_markup = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 stream_markup = buttons.stream_markup_fallback  
