@@ -27,11 +27,8 @@ from AnonXMusic.utils.database import (
 from AnonXMusic.utils.decorators.language import LanguageStart
 from AnonXMusic.utils.formatters import get_readable_time
 
-from AnonXMusic.utils.inline import (
-    private_panel,
-    start_panel,
-    help_pannel,
-)
+# Absolute import connection fixed
+from AnonXMusic.utils.inline.start import private_panel, start_panel
 
 from config import BANNED_USERS, LOGGER_ID
 from strings import get_string
@@ -40,8 +37,6 @@ from strings import get_string
 def make_panel_compact(original_markup):
     if not original_markup:
         return None
-
-    raw_keyboard = []
 
     if hasattr(original_markup, "inline_keyboard"):
         raw_keyboard = original_markup.inline_keyboard
@@ -55,6 +50,8 @@ def make_panel_compact(original_markup):
 
     for row in raw_keyboard:
         for button in row:
+            if not button:
+                continue
 
             if isinstance(button, dict):
                 btn_text = button.get("text", "")
@@ -65,8 +62,7 @@ def make_panel_compact(original_markup):
                 btn_url = getattr(button, "url", None)
                 btn_cb = getattr(button, "callback_data", None)
 
-            clean_text = btn_text.strip("• ").strip("⌗ ")
-
+            clean_text = str(btn_text).strip("• ").strip("⌗ ")
             kwargs = {}
 
             if btn_url:
@@ -76,21 +72,15 @@ def make_panel_compact(original_markup):
             else:
                 kwargs["callback_data"] = "noop"
 
-            new_btn = InlineKeyboardButton(
-                text=clean_text,
-                **kwargs
-            )
+            new_btn = InlineKeyboardButton(text=clean_text, **kwargs)
 
             if "ADD ME" in clean_text.upper():
                 if current_row:
                     new_keyboard.append(current_row)
                     current_row = []
-
                 new_keyboard.append([new_btn])
-
             else:
                 current_row.append(new_btn)
-
                 if len(current_row) == 2:
                     new_keyboard.append(current_row)
                     current_row = []
@@ -118,7 +108,12 @@ async def start_pm(client, message: Message, _):
     await asyncio.sleep(0.5)
 
     # ---------------- BUTTONS ----------------
-    out = make_panel_compact(private_panel(_))
+    try:
+        raw_buttons = private_panel(_)
+        out = make_panel_compact(raw_buttons)
+    except Exception as e:
+        print(f"BUTTON COMPACT ERROR: {e}")
+        out = InlineKeyboardMarkup(private_panel(_))
 
     # ---------------- MEDIA ----------------
     try:
@@ -128,9 +123,7 @@ async def start_pm(client, message: Message, _):
 
     # ---------------- SEND ----------------
     try:
-
         if media_url and str(media_url).endswith(".mp4"):
-
             await message.reply_video(
                 video=media_url,
                 caption=_["start_2"].format(
@@ -139,9 +132,7 @@ async def start_pm(client, message: Message, _):
                 ),
                 reply_markup=out,
             )
-
         elif media_url:
-
             await message.reply_photo(
                 photo=media_url,
                 caption=_["start_2"].format(
@@ -150,9 +141,7 @@ async def start_pm(client, message: Message, _):
                 ),
                 reply_markup=out,
             )
-
         else:
-
             await message.reply_text(
                 text=_["start_2"].format(
                     message.from_user.mention,
@@ -163,34 +152,41 @@ async def start_pm(client, message: Message, _):
             )
 
     except Exception as e:
-
         print(f"START MEDIA ERROR: {e}")
-
-        await message.reply_text(
-            text=_["start_2"].format(
-                message.from_user.mention,
-                app.mention
-            ),
-            reply_markup=out,
-            disable_web_page_preview=True,
-        )
+        try:
+            await message.reply_text(
+                text=_["start_2"].format(
+                    message.from_user.mention,
+                    app.mention
+                ),
+                reply_markup=out,
+                disable_web_page_preview=True,
+            )
+        except Exception as ex:
+            print(f"CRITICAL FALLBACK START FAILED: {ex}")
 
     # ---------------- LOGGER ----------------
     if await is_on_off(2):
-
-        return await app.send_message(
-            chat_id=config.LOGGER_ID,
-            text=f"{message.from_user.mention} started the bot.\n\n"
-                 f"User ID : {message.from_user.id}\n"
-                 f"Username : @{message.from_user.username}",
-        )
+        try:
+            await app.send_message(
+                chat_id=config.LOGGER_ID,
+                text=f"{message.from_user.mention} started the bot.\n\n"
+                     f"User ID : {message.from_user.id}\n"
+                     f"Username : @{message.from_user.username}",
+            )
+        except:
+            pass
 
 
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
 
-    out = make_panel_compact(start_panel(_))
+    try:
+        out = make_panel_compact(start_panel(_))
+    except:
+        out = InlineKeyboardMarkup(start_panel(_))
+        
     uptime = int(time.time() - _boot_)
 
     try:
@@ -199,9 +195,7 @@ async def start_gp(client, message: Message, _):
         media_url = None
 
     try:
-
         if media_url and str(media_url).endswith(".mp4"):
-
             await message.reply_video(
                 video=media_url,
                 caption=_["start_1"].format(
@@ -210,9 +204,7 @@ async def start_gp(client, message: Message, _):
                 ),
                 reply_markup=out,
             )
-
         elif media_url:
-
             await message.reply_photo(
                 photo=media_url,
                 caption=_["start_1"].format(
@@ -221,9 +213,7 @@ async def start_gp(client, message: Message, _):
                 ),
                 reply_markup=out,
             )
-
         else:
-
             await message.reply_text(
                 text=_["start_1"].format(
                     app.mention,
