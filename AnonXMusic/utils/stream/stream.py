@@ -10,7 +10,8 @@ from AnonXMusic.core.call import Anony
 from AnonXMusic.misc import db
 from AnonXMusic.utils.database import add_active_video_chat, is_active_chat
 from AnonXMusic.utils.exceptions import AssistantErr
-from AnonXMusic.utils.inline import aq_markup, close_markup, stream_markup
+# Direct timer component integration for perfect connections
+from AnonXMusic.utils.inline import aq_markup, close_markup, stream_markup_timer
 from AnonXMusic.utils.pastebin import AnonyBin
 from AnonXMusic.utils.stream.queue import put_queue, put_queue_index
 from AnonXMusic.utils.thumbnails import get_thumb
@@ -99,7 +100,8 @@ async def stream(
                     forceplay=forceplay,
                 )
                 img = await get_thumb(vidid,user_id)
-                button = stream_markup(_, chat_id)
+                # FIX: Connecting dynamic stream markup timer directly
+                button = stream_markup_timer(_, chat_id, played="00:00", duration=duration_min)
                 run = await app.send_photo(
                     original_chat_id,
                     photo=img,
@@ -109,7 +111,7 @@ async def stream(
                         duration_min,
                         user_name,
                     ),
-                    reply_markup=InlineKeyboardMarkup(button),
+                    reply_markup=button, # Removed nested markup wrapper
                 )
                 db[chat_id][0]["mystic"] = run
                 db[chat_id][0]["markup"] = "stream"
@@ -185,7 +187,8 @@ async def stream(
                 forceplay=forceplay,
             )
             img = await get_thumb(vidid,user_id)
-            button = stream_markup(_, chat_id)
+            # FIX: Connecting dynamic stream markup timer directly
+            button = stream_markup_timer(_, chat_id, played="00:00", duration=duration_min)
             run = await app.send_photo(
                 original_chat_id,
                 photo=img,
@@ -195,7 +198,7 @@ async def stream(
                     duration_min,
                     user_name,
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=button, # Removed nested markup wrapper
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "stream"
@@ -238,14 +241,15 @@ async def stream(
                 "audio",
                 forceplay=forceplay,
             )
-            button = stream_markup(_, chat_id)
+            # FIX: Soundcloud loading matrix layout map
+            button = stream_markup_timer(_, chat_id, played="00:00", duration=duration_min)
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.SOUNCLOUD_IMG_URL,
                 caption=_["stream_1"].format(
                     config.SUPPORT_CHAT, title[:23], duration_min, user_name
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=button,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -292,12 +296,13 @@ async def stream(
             )
             if video:
                 await add_active_video_chat(chat_id)
-            button = stream_markup(_, chat_id)
+            # FIX: Native telegram audio/video dynamic stream markup connection
+            button = stream_markup_timer(_, chat_id, played="00:00", duration=duration_min)
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
                 caption=_["stream_1"].format(link, title[:23], duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=button,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -353,7 +358,8 @@ async def stream(
                 forceplay=forceplay,
             )
             img = await get_thumb(vidid,user_id)
-            button = stream_markup(_, chat_id)
+            # FIX: Connecting dynamic stream markup timer directly
+            button = stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
             run = await app.send_photo(
                 original_chat_id,
                 photo=img,
@@ -363,7 +369,7 @@ async def stream(
                     duration_min,
                     user_name,
                 ),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=button,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
@@ -408,12 +414,13 @@ async def stream(
                 "video" if video else "audio",
                 forceplay=forceplay,
             )
-            button = stream_markup(_, chat_id)
+            # FIX: Connecting dynamic stream markup timer directly
+            button = stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
             run = await app.send_photo(
                 original_chat_id,
                 photo=config.STREAM_IMG_URL,
                 caption=_["stream_2"].format(user_name),
-                reply_markup=InlineKeyboardMarkup(button),
+                reply_markup=button,
             )
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
