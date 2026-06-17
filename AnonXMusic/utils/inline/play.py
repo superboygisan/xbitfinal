@@ -1,8 +1,6 @@
 import math
 from pyrogram import enums, types
 
-from AnonXMusic.utils.inline.play import stream_markup_timer, stream_markup
-
 class Inline:
     def __init__(self):
         self.ikm = types.InlineKeyboardMarkup
@@ -34,7 +32,7 @@ class Inline:
         elif status:
             keyboard.append([self._button(text=status, category="default", callback_data="noop")])
         else:
-            keyboard.append([self._button(text="⏳ 𝟬𝟬:𝟬𝟬 ❖ ▬▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬", category="success", callback_data="noop")])
+            keyboard.append([self._button(text="⏳ 00:00 ▬▬▬▬▬▬▬▬▬▬ 00:00", category="success", callback_data="noop")])
 
         if not remove:
             keyboard.append(
@@ -49,10 +47,6 @@ class Inline:
         return keyboard
 
     def stream_markup_timer(self, _, chat_id: int, played: str = "00:00", duration: str = "00:00"):
-        def to_script_font(time_str):
-            font_map = {'0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰', '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵', ':': ':'}
-            return "".join(font_map.get(c, c) for c in time_str)
-
         try:
             p_min, p_sec = map(int, str(played).split(":"))
             d_min, d_sec = map(int, str(duration).split(":"))
@@ -62,6 +56,7 @@ class Inline:
         except:
             percentage = 0
 
+        # Standard clean slider layout bar (10 steps)
         total_steps = 10
         active_pos = math.floor((percentage / 100) * total_steps)
         if active_pos >= total_steps:
@@ -69,16 +64,13 @@ class Inline:
 
         bar_text = ""
         for i in range(total_steps):
-            if i < active_pos:
-                bar_text += "■"
-            elif i == active_pos:
-                bar_text += "▶"
+            if i == active_pos:
+                bar_text += "🔘" # Active tracker point
             else:
-                bar_text += "▱"
+                bar_text += "▬"
 
-        played_font = to_script_font(str(played))
-        duration_font = to_script_font(str(duration))
-        full_graphic_bar = f"⏳ {played_font} ❖ {bar_text} ❖ {duration_font}"
+        # CHANGED: Ab bilkul plain standard stable numbers use honge (No fancy fonts to avoid rendering crash)
+        full_graphic_bar = f"⏳ {played} {bar_text} {duration}"
 
         button_color = "danger" if percentage >= 85 else "success"
         timer_row = [self._button(text=full_graphic_bar, category=button_color, callback_data="noop")]
@@ -87,7 +79,6 @@ class Inline:
         return self.ikm(raw_layout)
 
     def stream_markup_fallback(self, _, chat_id: int):
-        # BUG FIXED: Added proper language and ID flow structure mapping for fallback
         return self.stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
 
     def playlist_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
@@ -109,7 +100,6 @@ class Inline:
 
 buttons = Inline()
 
-# SYSTEM LAMBDA EXPORTS MAPPED CORRECTLY FOR CALL ENGINE
 controls = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 track_markup = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 stream_markup = lambda _, chat_id: buttons.stream_markup_fallback(_, chat_id)
