@@ -1,4 +1,3 @@
-
 from pyrogram import enums
 from pyrogram.types import InlineKeyboardButton
 
@@ -6,7 +5,6 @@ from config import OWNER_ID, SUPPORT_CHAT, SUPPORT_CHANNEL
 
 
 def btn(text, style="primary", **kwargs):
-
     styles = {
         "primary": enums.ButtonStyle.PRIMARY,
         "success": enums.ButtonStyle.SUCCESS,
@@ -39,6 +37,8 @@ def start_panel(bot_username):
 
 
 def private_panel(bot_username):
+    # Fallback to prevent layout breakage if OWNER_ID is empty
+    clean_owner = OWNER_ID if OWNER_ID else 6125430221 
     return [
         [
             btn(
@@ -58,7 +58,7 @@ def private_panel(bot_username):
             btn(
                 text="👑 Owner",
                 style="danger",
-                user_id=OWNER_ID,
+                user_id=int(clean_owner),
             ),
             btn(
                 text="📢 Channel",
