@@ -51,7 +51,7 @@ async def _clear_(chat_id):
     await remove_active_chat(chat_id)
 
 
-class Call(PyTgCalls):
+class Anony(PyTgCalls): # BUG FIXED: Class name changed from 'Call' to 'Anony'
     def __init__(self):
         self.userbot1 = Client(
             name="AnonXAss1",
@@ -124,7 +124,6 @@ class Call(PyTgCalls):
         while chat_id in self.active_workers and db.get(chat_id):
             await asyncio.sleep(5)
             
-            # Check if group call is still running fine
             if not db.get(chat_id) or not self.active_workers.get(chat_id):
                 break
                 
@@ -138,7 +137,6 @@ class Call(PyTgCalls):
                 updated_markup = stream_markup_timer(_, chat_id, played=played_str, duration=total_duration)
                 await mystic.edit_reply_markup(reply_markup=updated_markup)
             except Exception as e:
-                # Silently catch FloodWaits / MessageNotModified
                 if "MessageNotModified" not in str(e):
                     pass
 
@@ -379,7 +377,7 @@ class Call(PyTgCalls):
                 autoend[chat_id] = datetime.now() + timedelta(minutes=1)
 
     async def change_stream(self, client, chat_id):
-        self.active_workers.pop(chat_id, None)  # Old worker cleared safely
+        self.active_workers.pop(chat_id, None)
         check = db.get(chat_id)
         popped = None
         loop = await get_loop(chat_id)
