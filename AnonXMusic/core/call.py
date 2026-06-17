@@ -51,8 +51,11 @@ async def _clear_(chat_id):
     await remove_active_chat(chat_id)
 
 
-class Anony(PyTgCalls): # BUG FIXED: Class name changed from 'Call' to 'Anony'
+class Anony(PyTgCalls):
     def __init__(self):
+        # FIX: Maps internal wrapper layer attributes to prevent decorator plugin attribute crashes
+        self.decorators = self
+        
         self.userbot1 = Client(
             name="AnonXAss1",
             api_id=config.API_ID,
