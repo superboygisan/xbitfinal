@@ -14,23 +14,27 @@ class Inline:
         }
 
     def _button(self, text: str, category: str = "default", **kwargs):
+        if "url" in kwargs and kwargs["url"]:
+            url_str = str(kwargs["url"]).strip()
+            if not (url_str.startswith("http://") or url_str.startswith("https://")):
+                kwargs["url"] = f"https://t.me/Telegram"
         return self.ikb(
             text=text,
             style=self.styles.get(category, enums.ButtonStyle.DEFAULT),
             **kwargs,
         )
 
-    # MAIN CONTROL HUB
+    # MAIN CONTROL HUB (Ab isme hamesha default bar embedded rahega)
     def track_markup(self, _, chat_id: int, status: str = None, timer_row: list = None, remove: bool = False):
         keyboard = []
 
+        # JAD SE FIX: Agar koi bhi row nahi aa rahi, toh default loading bar compulsory append hoga
         if timer_row:
             keyboard.append(timer_row)
         elif status:
             keyboard.append([self._button(text=status, category="default", callback_data="noop")])
         else:
-            # Clean initial loading bar style
-            keyboard.append([self._button(text="⏳ 𝟬values𝟬 ❖ ▬▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬", category="success", callback_data="noop")])
+            keyboard.append([self._button(text="⏳ 𝟬𝟬:𝟬𝟬 ❖ ▬▱▱▱▱▱▱▱▱▱ ❖ 𝟬𝟬:𝟬𝟬", category="success", callback_data="noop")])
 
         if not remove:
             keyboard.append(
@@ -82,7 +86,6 @@ class Inline:
         except:
             percentage = 0
 
-        # Sleek Loading Matrix
         total_steps = 10
         active_pos = math.floor((percentage / 100) * total_steps)
         if active_pos >= total_steps:
@@ -91,16 +94,15 @@ class Inline:
         bar_text = ""
         for i in range(total_steps):
             if i < active_pos:
-                bar_text += "■"  # Completed loading blocks
+                bar_text += "■"
             elif i == active_pos:
-                bar_text += "▶"  # Head runner loader pointer
+                bar_text += "🌛"
             else:
-                bar_text += "▱"  # Empty path remaining
+                bar_text += "▱"
 
         played_font = to_script_font(str(played))
         duration_font = to_script_font(str(duration))
 
-        # Balanced loading UI format string
         full_graphic_bar = f"⏳ {played_font} ❖ {bar_text} ❖ {duration_font}"
 
         button_color = "danger" if percentage >= 85 else "success"
@@ -111,6 +113,7 @@ class Inline:
     def stream_markup_fallback(self, _, chat_id: int):
         return self.stream_markup_timer(_, chat_id, played="00:00", duration="00:00")
 
+    # SARE METHODS ME SE DIRECT LIST HATA KAR SEEDHE IKM COMPONENT WRAP KAR DIYA
     def playlist_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def livestream_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
     def slider_markup(self, _, chat_id: int): return self.ikm(self.track_markup(_, chat_id))
@@ -123,13 +126,16 @@ class Inline:
         return self.ikm([[self._button(text=text, category="success", callback_data=f"ADMIN Resume|{chat_id}")]])
         
     def yt_key(self, link: str):
-        return self.ikm([[self._button(text="📋 Copy Link", category="primary", copy_text=link), self._button(text="🎬 YouTube", category="danger", url=link)]])
+        clean_link = str(link).strip() if link else "https://youtube.com"
+        if not (clean_link.startswith("http://") or clean_link.startswith("https://")):
+            clean_link = f"https://{clean_link}"
+        return self.ikm([[self._button(text="📋 Copy Link", category="primary", copy_text=clean_link), self._button(text="🎬 YouTube", category="danger", url=clean_link)]])
 
 buttons = Inline()
 
-# HOOK OVERRIDES MAPPED
-controls = buttons.track_markup
-track_markup = buttons.track_markup
+# DYNAMIC OVERWRITE FOR MAXIMUM RECOVERY
+controls = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
+track_markup = lambda *args, **kwargs: buttons.ikm(buttons.track_markup(*args, **kwargs))
 stream_markup = buttons.stream_markup_fallback  
 stream_markup_timer = buttons.stream_markup_timer
 playlist_markup = buttons.playlist_markup
